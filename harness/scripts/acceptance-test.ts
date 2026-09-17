@@ -66,8 +66,14 @@ async function run() {
   const finalDiff = await tools.get_diff();
   console.log('\n7. get_diff (final)');
   console.log(finalDiff);
-  assert(finalDiff.includes(FIXED_FILTER), 'Expected fixed filter in diff');
-  assert(!finalDiff.includes(BUGGY_FILTER), 'Buggy filter should be gone from diff');
+  assert(
+    finalDiff.includes(`+  ${FIXED_FILTER}`),
+    'Expected fixed filter as added line in diff',
+  );
+  assert(
+    finalDiff.includes(`-  ${BUGGY_FILTER}`),
+    'Expected buggy filter as removed line in diff',
+  );
 
   const changedFiles = execFileSync(
     'git',

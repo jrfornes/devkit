@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { loadConfig } from './config.js';
 import { formatCommandResult, runCommand } from './runner.js';
+import { getSkill } from './skills/registry.js';
 import { getDiff, getStatus } from './workspace.js';
-import type { HarnessConfig, SkillContext, SkillResult } from './types.js';
+import type { HarnessConfig, SkillContext } from './types.js';
 
 export interface ToolHandlers {
   status: () => Promise<string>;
@@ -19,29 +19,6 @@ function createSkillContext(config: HarnessConfig): SkillContext {
     config,
     runCommand,
   };
-}
-
-async function loadSkill(
-  config: HarnessConfig,
-  name: string,
-): Promise<(ctx: SkillContext) => Promise<SkillResult>> {
-  const skillDir = path.join(config.skillsDir, name);
-  const jsPath = path.join(skillDir, 'run.js');
-  const tsPath = path.join(skillDir, 'run.ts');
-
-  let importPath = tsPath;
-  try {
-    await fs.access(jsPath);
-    importPath = jsPath;
-  } catch {
-    importPath = tsPath;
-  }
-
-  const module = await import(pathToFileURL(importPath).href);
-  if (typeof module.run !== 'function') {
-    throw new Error(`Skill "${name}" must export a run() function`);
-  }
-  return module.run;
 }
 
 export function createToolHandlers(config = loadConfig()): ToolHandlers {
@@ -69,7 +46,7 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
     async run_skill(name) {
       const skillMdPath = path.join(config.skillsDir, name, 'SKILL.md');
       const skillDoc = await fs.readFile(skillMdPath, 'utf8').catch(() => null);
-      const run = await loadSkill(config, name);
+      const run = getSkill(name);
       const result = await run(createSkillContext(config));
 
       const payload = {
