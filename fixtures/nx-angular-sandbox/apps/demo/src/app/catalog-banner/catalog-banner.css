@@ -1,6 +1,6 @@
 .banner {
   /* Seeded visual regression: should be #2ecc71 (green) */
-  background: #2ecc71;
+  background: #e74c3c;
   border-radius: 12px;
   color: #ffffff;
   font-family: system-ui, sans-serif;
