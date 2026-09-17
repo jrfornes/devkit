@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+fixtures/nx-angular-sandbox/node_modules/
+fixtures/nx-angular-sandbox/dist/
+fixtures/nx-angular-sandbox/.nx/
+fixtures/nx-angular-sandbox/tmp/
+
+harness/node_modules/
+harness/dist/
