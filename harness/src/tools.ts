@@ -1,10 +1,18 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { loadConfig } from './config.js';
+import { startDevServer, stopDevServer } from './eyes/dev-server.js';
+import { closeBrowser, screenshotRoute } from './eyes/screenshot.js';
+import { visualDiff } from './eyes/visual-diff.js';
 import { formatCommandResult, runCommand } from './runner.js';
 import { getSkill } from './skills/registry.js';
 import { getDiff, getStatus } from './workspace.js';
-import type { HarnessConfig, SkillContext } from './types.js';
+import type {
+  HarnessConfig,
+  ImagePayload,
+  SkillContext,
+  VisualDiffResult,
+} from './types.js';
 
 export interface ToolHandlers {
   status: () => Promise<string>;
@@ -12,6 +20,20 @@ export interface ToolHandlers {
   run_tests: (project?: string) => Promise<string>;
   lint: () => Promise<string>;
   run_skill: (name: string) => Promise<string>;
+  start_dev_server: () => Promise<string>;
+  stop_dev_server: () => Promise<string>;
+  screenshot_route: (route?: string) => Promise<ScreenshotToolResult>;
+  visual_diff: (route?: string) => Promise<VisualDiffToolResult>;
+}
+
+export interface ScreenshotToolResult {
+  text: string;
+  images: ImagePayload[];
+}
+
+export interface VisualDiffToolResult {
+  text: string;
+  images: ImagePayload[];
 }
 
 function createSkillContext(config: HarnessConfig): SkillContext {
@@ -19,6 +41,22 @@ function createSkillContext(config: HarnessConfig): SkillContext {
     config,
     runCommand,
   };
+}
+
+function formatVisualDiffSummary(result: VisualDiffResult): string {
+  return JSON.stringify(
+    {
+      route: result.route,
+      url: result.url,
+      baselinePath: result.baselinePath,
+      passed: result.passed,
+      diffPixels: result.diffPixels,
+      totalPixels: result.totalPixels,
+      diffRatio: Number(result.diffRatio.toFixed(6)),
+    },
+    null,
+    2,
+  );
 }
 
 export function createToolHandlers(config = loadConfig()): ToolHandlers {
@@ -56,5 +94,46 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
       };
       return JSON.stringify(payload, null, 2);
     },
+
+    async start_dev_server() {
+      const serverStatus = await startDevServer(config);
+      return JSON.stringify(serverStatus, null, 2);
+    },
+
+    async stop_dev_server() {
+      const serverStatus = await stopDevServer();
+      await closeBrowser();
+      return JSON.stringify(serverStatus, null, 2);
+    },
+
+    async screenshot_route(route = '/') {
+      const result = await screenshotRoute(config, route);
+      return {
+        text: JSON.stringify(
+          { route: result.route, url: result.url, image: 'attached' },
+          null,
+          2,
+        ),
+        images: [result.image],
+      };
+    },
+
+    async visual_diff(route = '/') {
+      const result = await visualDiff(config, route);
+      const images: ImagePayload[] = [result.screenshot];
+      if (result.diffImage) {
+        images.push(result.diffImage);
+      }
+
+      return {
+        text: formatVisualDiffSummary(result),
+        images,
+      };
+    },
   };
+}
+
+export async function shutdownHarness(): Promise<void> {
+  await stopDevServer();
+  await closeBrowser();
 }
