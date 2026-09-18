@@ -57,25 +57,20 @@ npm run print-config
 # Install fixture dependencies
 cd fixtures/nx-angular-sandbox && npm install
 
-# Install harness dependencies (emits harness/dist/index.js)
-cd ../../harness && npm install && npm run build
-ls dist/index.js
+# Install harness dependencies
+cd ../../harness && npm install
 ```
+
+You do **not** need `npm run build` to run the MCP server. Cursor should execute
+the committed launcher `harness/run-mcp.mjs` (it runs `src/index.ts` via tsx).
+`dist/` is gitignored, so it will not show up in the GitHub PR or in Cursor's
+default file tree.
 
 ## Run the MCP server
 
 ```bash
 cd harness
-npm run dev
-```
-
-`npm run build` must leave `harness/dist/index.js` (the MCP `command` path below).
-If you previously built with the old layout, delete `harness/dist` and rebuild.
-To skip the emit and run TypeScript directly:
-
-```bash
-cd harness
-npx tsx src/index.ts
+npm start
 ```
 
 ### Cursor / Claude Desktop config (sandbox)
@@ -85,7 +80,7 @@ npx tsx src/index.ts
   "mcpServers": {
     "agentic-ui-dev": {
       "command": "node",
-      "args": ["/absolute/path/to/devkit/harness/dist/index.js"],
+      "args": ["/absolute/path/to/devkit/harness/run-mcp.mjs"],
       "env": {
         "HARNESS_REPO_ROOT": "/absolute/path/to/devkit",
         "HARNESS_WORKSPACE": "/absolute/path/to/devkit/fixtures/nx-angular-sandbox"
@@ -125,7 +120,7 @@ Fill in real values (`nx show projects` in the private checkout):
   "mcpServers": {
     "agentic-ui-dev": {
       "command": "node",
-      "args": ["/absolute/path/to/devkit/harness/dist/index.js"],
+      "args": ["/absolute/path/to/devkit/harness/run-mcp.mjs"],
       "env": {
         "HARNESS_REPO_ROOT": "/absolute/path/to/devkit",
         "HARNESS_PROFILE": "nx-angular-private",

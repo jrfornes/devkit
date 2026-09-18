@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "bin": {
-    "agentic-ui-harness": "./dist/index.js"
+    "agentic-ui-harness": "./run-mcp.mjs"
   },
   "scripts": {
-    "build": "tsc && node --input-type=module -e \"import fs from 'node:fs'; fs.accessSync('dist/index.js')\"",
+    "build": "tsc && node --input-type=module -e \"import fs from 'node:fs'; import path from 'node:path'; const p = path.resolve('dist/index.js'); fs.accessSync(p); console.log('Wrote', p);\"",
     "typecheck": "tsc -p tsconfig.scripts.json",
-    "start": "node dist/index.js",
-    "dev": "tsx src/index.ts",
+    "start": "node run-mcp.mjs",
+    "dev": "node run-mcp.mjs",
     "acceptance": "tsx scripts/acceptance-test.ts",
     "acceptance:eyes": "tsx scripts/acceptance-eyes-test.ts",
     "acceptance:ship": "tsx scripts/acceptance-ship-test.ts",

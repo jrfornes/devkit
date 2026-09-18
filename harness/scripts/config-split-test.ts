@@ -8,6 +8,7 @@ import { loadProfileConfigFile } from '../src/profiles/load-profile-config.js';
 import { getDiff, getStatus, workspacePathspec } from '../src/workspace.js';
 
 const harnessRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const harnessDir = path.join(harnessRoot, 'harness');
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -54,6 +55,12 @@ function initTempGitRepo(): string {
 
 async function run() {
   console.log('Config split: harness root vs target repo\n');
+
+  const launcher = path.join(harnessDir, 'run-mcp.mjs');
+  const tsxCli = path.join(harnessDir, 'node_modules/tsx/dist/cli.mjs');
+  assert(fs.existsSync(launcher), `Committed MCP launcher missing: ${launcher}`);
+  assert(fs.existsSync(tsxCli), `tsx missing; run npm install in ${harnessDir}`);
+  console.log('0. MCP launcher is committed (no dist/index.js required)');
 
   await withClearedHarnessEnv(async () => {
     const sandbox = loadConfig({ repoRoot: harnessRoot });
