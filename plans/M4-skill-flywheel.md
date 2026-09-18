@@ -1,6 +1,6 @@
 # M4 — Skill flywheel (Rung 2)
 
-*Skills as the primary artifact — mounted, discoverable, composable.*
+*Skills as the primary artifact — discoverable, composable.*
 
 ## Goal
 

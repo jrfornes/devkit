@@ -19,7 +19,7 @@ agentic UI. Not feature work. One loop, closed, for real.
 
 - **MCP server** exposing a minimal verb set (subset of [MCP.md](./MCP.md))
 - **One project profile:** nx-angular, bound to the sandbox fixture, run against a
-  **local checkout** (no container yet)
+  **local checkout**
 - **The oracle:** `run_tests` + `lint`, run locally — *this local pass/fail is the
   loop's check;* there is no CI in the MVP
 - **One self-healing skill:** `heal-failing-test` (non-visual failure)
@@ -34,7 +34,6 @@ agentic UI. Not feature work. One loop, closed, for real.
   where the check is *free*, so it dodges the project's actual bet (UI). The next
   build after MVP has to heal a *visual* regression — otherwise we've never tested
   the thesis.
-- **The container** — local checkout first; container is the step after
 - **`open_pr` / CI** — MVP stops at the diff
 - Agentic UI — Phase 2
 - Autonomous orchestration — the human drives the loop via the host
@@ -93,8 +92,9 @@ loop can't converge.
 
 - **Eyes: OUT of MVP.** Prove the loop where the check is free (unit test) first;
   fewest moving parts. Caveat: eyes are the *immediate* next milestone (above).
-- **Environment: LOCAL checkout, no container.** The blocker on the real project
-  is that it's a *private* nx repo (code entanglement / access), not environment
-  isolation — so the fixture already solves it and the container can wait.
+- **Environment: LOCAL checkout.** Docker is out of scope, not deferred — the
+  harness runs on the host against a configured workspace. The blocker on the
+  real project is that it's a *private* nx repo (code entanglement / access),
+  not environment isolation; the fixture already solves that.
 - **Delivery: STOP AT DIFF, no PR/CI.** The loop's check is the local `run_tests`
   pass, so dropping the PR doesn't cost the loop; the PR is just delivery.

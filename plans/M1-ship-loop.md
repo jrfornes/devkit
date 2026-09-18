@@ -83,7 +83,6 @@ Sandbox CI: add `.github/workflows/sandbox-ci.yml` in repo root that runs
 - Auto-merge
 - Multiple forges (GitLab) — design interface, implement GitHub only
 - Signing commits / GPG
-- Container — still local checkout
 
 ## Implementation steps
 

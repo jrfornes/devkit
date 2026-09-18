@@ -16,10 +16,10 @@ and suggested file layout. Plans are ordered by dependency, not calendar time.
 | CI oracle | ✅ | `run_tests`, `lint`, `run_build` |
 | Eyes (local) | ✅ | `start/stop_dev_server`, `screenshot_route`, `visual_diff` |
 | Skills (specimen-specific) | ✅ | `heal-failing-test`, `heal-visual-regression` |
-| nx-angular profile | ✅ | Local checkout only |
+| nx-angular profile | ✅ | Local checkout |
 | Sandbox fixture | ✅ | Specimen B (test) + catalog banner (visual) |
 | Acceptance tests | ✅ | `acceptance`, `acceptance:eyes`, `acceptance:ship` |
-| Container | ❌ | |
+| Docker / container | ❌ dropped | Local checkout is the environment; M2 cancelled |
 | `run_build` | ✅ | nx-angular profile |
 | `open_pr` / CI | ✅ | GitHub via REST/`gh`; `ci_status` polls checks |
 | Interaction tests | ❌ | |
@@ -37,14 +37,17 @@ host. We are roughly at **Rung 0 (local)** + **Rung 1 (two specimens only)**.
 | # | Plan | Closes | Depends on |
 |---|------|--------|------------|
 | M1 | [Ship loop](./M1-ship-loop.md) | `run_build`, `open_pr`, CI status | — |
-| M2 | [Container lifecycle](./M2-container-lifecycle.md) | Per-branch Docker workspace | M1 (optional: parallel) |
+| M2 | ~~Container lifecycle~~ | **Dropped.** Docker is out of scope; tools run on the host against a local checkout. | — |
 | M3 | [Rung 1 breadth](./M3-rung1-breadth.md) | More skills + specimens A/C | M1 |
 | M4 | [Skill flywheel](./M4-skill-flywheel.md) | Discoverable skill library (Rung 2) | M3 |
-| M5 | [Interaction tests](./M5-interaction-tests.md) | Browser actions + interaction oracle | Eyes (built), M2 |
-| M6 | [Port to real repo](./M6-port-real-repo.md) | Second project profile | M1, M2 |
+| M5 | [Interaction tests](./M5-interaction-tests.md) | Browser actions + interaction oracle | Eyes (built) |
+| M6 | [Port to real repo](./M6-port-real-repo.md) | Second project profile | M1 |
 | M7 | [Rungs 3–4](./M7-rungs-3-4.md) | Wider task types | M4, M5 |
 | M8 | [Agentic UI](./M8-agentic-ui.md) | Phase 2 shell | M1–M4 minimum |
 | — | [METRICS.md](../METRICS.md) | Measurement model | M1 (instrumentation) |
+
+M2 numbers are kept so later milestone IDs stay stable. There is no replacement
+container milestone.
 
 ---
 
@@ -54,7 +57,6 @@ host. We are roughly at **Rung 0 (local)** + **Rung 1 (two specimens only)**.
 flowchart TB
     built["Built: MVP + eyes (local)"]
     m1["M1 Ship loop"]
-    m2["M2 Container"]
     m3["M3 Rung 1 breadth"]
     m4["M4 Skill flywheel"]
     m5["M5 Interaction tests"]
@@ -69,9 +71,6 @@ flowchart TB
     m1 --> m6
     m1 --> metrics
     m1 --> m8
-    m2 --> m5
-    m2 --> m6
-    m1 --> m2
     m3 --> m4
     m4 --> m7
     m5 --> m7
@@ -91,13 +90,14 @@ flowchart TB
    stubbed tool responses.
 5. **Whole suite as oracle** — a fix that greens one test while breaking another
    is a fail.
+6. **Local workspace, not Docker** — the harness runs on the host against a
+   configured checkout. Isolation is a git branch, not a container.
 
 ---
 
 ## Docs in this set
 
 - [M1 — Ship loop](./M1-ship-loop.md)
-- [M2 — Container lifecycle](./M2-container-lifecycle.md)
 - [M3 — Rung 1 breadth](./M3-rung1-breadth.md)
 - [M4 — Skill flywheel](./M4-skill-flywheel.md)
 - [M5 — Interaction tests](./M5-interaction-tests.md)

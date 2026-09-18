@@ -29,7 +29,6 @@ gameable.
 | **Task mix by rung** | % tasks at Rungs 1–4 | Shows autonomy frontier moving up |
 | **Visual diff catch rate** | UI regressions caught by eyes before PR / total UI regressions | Validates central bet |
 | **Mean tool calls per task** | MCP tool invocations to complete task | Loop efficiency |
-| **Workspace idle cost** | Container-hours × branch | Infra cost (post-M2) |
 
 ## Instrumentation plan
 

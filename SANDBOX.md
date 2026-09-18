@@ -8,17 +8,17 @@ work. That one distinction is the entire porting story.
 
 ## Fixture, not root
 
-The product is the harness (MCP server, container, skills, eyes). The workspace
+The product is the harness (MCP server, skills, eyes). The workspace
 it operates on is a *test subject*. If the workspace were the root and we built
 tooling inside it, the tool would quietly grow assumptions about that specific
 workspace — paths, layout, "the app is right here" — and "grab the things into my
 real project" becomes a disentangling job.
 
 Instead the harness is the root and the workspace is an **input**: a path/repo it
-is configured to target. The seam stays clean. And it is the *same seam* as
-"per-project Docker container" from the architecture — the container mounts a
-target workspace; the harness shouldn't care which one. Building against a
-fixture just exercises that seam early.
+is configured to target. The seam stays clean. And it is the *same seam* as the
+architecture's local workspace — the harness is pointed at a checkout; it
+shouldn't care which one. Building against a fixture just exercises that seam
+early.
 
 ## The project profile (where the leverage is)
 
@@ -29,7 +29,7 @@ there is a small nx-angular profile (the commands, where components live, how th
 dev server comes up).
 
 Porting, then, isn't "grab the code." It's **point the harness at the real repo
-and write its profile.** Skills, server, container, eyes all stay put. The
+and write its profile.** Skills, server, eyes all stay put. The
 fixture's whole job is to prove the nx-angular profile works. (Profile concept
 also in [ARCHITECTURE.md](./ARCHITECTURE.md).)
 
