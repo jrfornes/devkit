@@ -6,6 +6,8 @@ const DEV_SERVER_PORT = 4200;
 
 export const nxAngularProfile: ProjectProfile = {
   name: 'nx-angular',
+  buildProjects: ['demo'],
+  defaultBaseBranch: 'main',
 
   devServer: {
     serveProject: 'demo',
@@ -35,6 +37,22 @@ export const nxAngularProfile: ProjectProfile = {
       'run-many',
       '-t',
       'lint',
+      '--skip-nx-cache',
+    ]);
+  },
+
+  runBuild(workspaceRoot, project) {
+    if (project) {
+      return runCommand(workspaceRoot, 'npx', ['nx', 'build', project, '--skip-nx-cache']);
+    }
+
+    const projects = nxAngularProfile.buildProjects ?? ['demo'];
+    return runCommand(workspaceRoot, 'npx', [
+      'nx',
+      'run-many',
+      '-t',
+      'build',
+      `--projects=${projects.join(',')}`,
       '--skip-nx-cache',
     ]);
   },

@@ -16,10 +16,25 @@ const itemFilterPath = path.join(
   'libs/shared-data/src/lib/item-filter.ts',
 );
 
-function resetFixture() {
+function seedFailure() {
   const contents = fs.readFileSync(itemFilterPath, 'utf8');
-  if (!contents.includes(BUGGY_FILTER)) {
-    throw new Error('Fixture is not in the expected seeded-failure state.');
+  if (contents.includes(BUGGY_FILTER)) {
+    return;
+  }
+  if (contents.includes(FIXED_FILTER)) {
+    fs.writeFileSync(itemFilterPath, contents.replace(FIXED_FILTER, BUGGY_FILTER), 'utf8');
+    return;
+  }
+  throw new Error('Fixture is not in a recognized filterActiveItems state.');
+}
+
+function restoreFixture() {
+  const contents = fs.readFileSync(itemFilterPath, 'utf8');
+  if (contents.includes(FIXED_FILTER)) {
+    return;
+  }
+  if (contents.includes(BUGGY_FILTER)) {
+    fs.writeFileSync(itemFilterPath, contents.replace(BUGGY_FILTER, FIXED_FILTER), 'utf8');
   }
 }
 
@@ -32,7 +47,7 @@ function assert(condition: unknown, message: string): asserts condition {
 async function run() {
   console.log('Acceptance test: MVP loop against nx-angular sandbox\n');
 
-  resetFixture();
+  seedFailure();
 
   const status = await tools.status();
   console.log('1. status');
@@ -92,8 +107,13 @@ async function run() {
   console.log('\n✅ Acceptance test passed');
 }
 
-run().catch((error) => {
-  console.error('\n❌ Acceptance test failed');
-  console.error(error);
-  process.exit(1);
-});
+run()
+  .then(() => {
+    restoreFixture();
+  })
+  .catch((error) => {
+    restoreFixture();
+    console.error('\n❌ Acceptance test failed');
+    console.error(error);
+    process.exit(1);
+  });

@@ -11,7 +11,7 @@ const tools = createToolHandlers(config);
 
 const server = new McpServer({
   name: 'agentic-ui-dev-harness',
-  version: '0.2.0',
+  version: '0.3.0',
 });
 
 server.tool(
@@ -52,6 +52,20 @@ server.tool(
   {},
   async () => ({
     content: [{ type: 'text', text: await tools.lint() }],
+  }),
+);
+
+server.tool(
+  'run_build',
+  'Run the workspace build (or a single nx project when project is provided).',
+  {
+    project: z
+      .string()
+      .optional()
+      .describe('Optional nx project name, e.g. demo'),
+  },
+  async ({ project }) => ({
+    content: [{ type: 'text', text: await tools.run_build(project) }],
   }),
 );
 
@@ -130,6 +144,55 @@ server.tool(
       ],
     };
   },
+);
+
+server.tool(
+  'open_pr',
+  'Create a branch, commit workspace changes, push, and open a pull request.',
+  {
+    title: z.string().describe('Pull request title'),
+    body: z.string().optional().describe('Pull request body'),
+    draft: z.boolean().optional().describe('Open as draft (default true)'),
+    base_branch: z
+      .string()
+      .optional()
+      .describe('Base branch (default from profile or main)'),
+    branch: z
+      .string()
+      .optional()
+      .describe('Head branch name (default: generated harness/ship-* name)'),
+  },
+  async ({ title, body, draft, base_branch, branch }) => ({
+    content: [
+      {
+        type: 'text',
+        text: await tools.open_pr({
+          title,
+          body,
+          draft,
+          baseBranch: base_branch,
+          branchName: branch,
+        }),
+      },
+    ],
+  }),
+);
+
+server.tool(
+  'ci_status',
+  'Report CI check status for a branch or pull request URL.',
+  {
+    branch: z.string().optional().describe('Branch name to inspect'),
+    pr_url: z.string().optional().describe('Pull request URL to inspect'),
+  },
+  async ({ branch, pr_url }) => ({
+    content: [
+      {
+        type: 'text',
+        text: await tools.ci_status({ branch, prUrl: pr_url }),
+      },
+    ],
+  }),
 );
 
 async function main() {

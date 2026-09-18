@@ -10,5 +10,5 @@ export interface CatalogItem {
  * Items without an explicit `active: false` are considered active.
  */
 export function filterActiveItems(items: CatalogItem[]): CatalogItem[] {
-  return items.filter((item) => item.active === true);
+  return items.filter((item) => item.active !== false);
 }

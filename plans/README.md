@@ -13,15 +13,15 @@ and suggested file layout. Plans are ordered by dependency, not calendar time.
 | Component | Status | Notes |
 |-----------|--------|-------|
 | MCP server (local) | ✅ | `harness/src/index.ts` |
-| CI oracle (partial) | ✅ | `run_tests`, `lint` — no `run_build` |
+| CI oracle | ✅ | `run_tests`, `lint`, `run_build` |
 | Eyes (local) | ✅ | `start/stop_dev_server`, `screenshot_route`, `visual_diff` |
 | Skills (specimen-specific) | ✅ | `heal-failing-test`, `heal-visual-regression` |
 | nx-angular profile | ✅ | Local checkout only |
 | Sandbox fixture | ✅ | Specimen B (test) + catalog banner (visual) |
-| Acceptance tests | ✅ | `acceptance`, `acceptance:eyes` |
+| Acceptance tests | ✅ | `acceptance`, `acceptance:eyes`, `acceptance:ship` |
 | Container | ❌ | |
-| `run_build` | ❌ | |
-| `open_pr` / CI | ❌ | Loop stops at `get_diff` |
+| `run_build` | ✅ | nx-angular profile |
+| `open_pr` / CI | ✅ | GitHub via REST/`gh`; `ci_status` polls checks |
 | Interaction tests | ❌ | |
 | Skill discovery | ❌ | Hardcoded registry |
 | Metrics | ❌ | [METRICS.md](../METRICS.md) not written |

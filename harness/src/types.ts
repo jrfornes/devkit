@@ -16,9 +16,12 @@ export interface ProjectProfile {
   name: string;
   devServer: DevServerConfig;
   runTests: (workspaceRoot: string, project?: string) => Promise<CommandResult>;
+  runBuild: (workspaceRoot: string, project?: string) => Promise<CommandResult>;
   lint: (workspaceRoot: string) => Promise<CommandResult>;
   devServerUrl: (port?: number) => string;
   routeToBaselineName: (route: string) => string;
+  buildProjects?: string[];
+  defaultBaseBranch?: string;
 }
 
 export interface HarnessConfig {
@@ -73,4 +76,35 @@ export interface DevServerStatus {
   port: number | null;
   project: string | null;
   pid: number | null;
+}
+
+export interface OpenPrOptions {
+  title: string;
+  body?: string;
+  draft?: boolean;
+  baseBranch?: string;
+  branchName?: string;
+  commitMessage?: string;
+}
+
+export interface OpenPrResult {
+  success: boolean;
+  prUrl?: string;
+  branch?: string;
+  commitSha?: string;
+  error?: string;
+}
+
+export interface CiCheck {
+  name: string;
+  status: 'pending' | 'success' | 'failure' | 'skipped';
+  url?: string;
+}
+
+export interface CiStatusResult {
+  state: 'pending' | 'success' | 'failure';
+  checks: CiCheck[];
+  prUrl?: string;
+  headSha?: string;
+  branch?: string;
 }
