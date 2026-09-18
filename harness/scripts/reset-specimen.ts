@@ -76,13 +76,15 @@ export function lintSpecimenLabel(): string {
     good: `<section class="banner" data-testid="catalog-banner">
   <p class="eyebrow">Storefront</p>
   <h1>Active Catalog</h1>
-  <p class="subtitle">{{ activeCount() }} items available</p>
+  <p class="subtitle">{{ displayedCount() }} items available</p>
+  <button type="button" class="refresh" data-testid="refresh-count" (click)="refreshCount()">Refresh count</button>
 </section>
 `,
     buggy: `<section class="banner" data-testid="catalog-banner">
   <p class="eyebrow">Storefront</p>
   <h1>{{ brokenBannerTitle() }}</h1>
-  <p class="subtitle">{{ activeCount() }} items available</p>
+  <p class="subtitle">{{ displayedCount() }} items available</p>
+  <button type="button" class="refresh" data-testid="refresh-count">Refresh count</button>
 </section>
 `,
   },
