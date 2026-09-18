@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { loadConfig } from './config.js';
+import { shutdownHarness } from './tools.js';
 import { createToolHandlers } from './tools.js';
 
 const config = loadConfig();
@@ -10,12 +11,12 @@ const tools = createToolHandlers(config);
 
 const server = new McpServer({
   name: 'agentic-ui-dev-harness',
-  version: '0.1.0',
+  version: '0.2.0',
 });
 
 server.tool(
   'status',
-  'Report branch, workspace path, and dirty files for the configured target.',
+  'Report branch, workspace path, dirty files, and dev server state.',
   {},
   async () => ({
     content: [{ type: 'text', text: await tools.status() }],
@@ -65,12 +66,89 @@ server.tool(
   }),
 );
 
+server.tool(
+  'start_dev_server',
+  'Start the workspace dev server for visual inspection.',
+  {},
+  async () => ({
+    content: [{ type: 'text', text: await tools.start_dev_server() }],
+  }),
+);
+
+server.tool(
+  'stop_dev_server',
+  'Stop the workspace dev server and close the headless browser.',
+  {},
+  async () => ({
+    content: [{ type: 'text', text: await tools.stop_dev_server() }],
+  }),
+);
+
+server.tool(
+  'screenshot_route',
+  'Render a route in the headless browser and return a screenshot image.',
+  {
+    route: z
+      .string()
+      .optional()
+      .describe('Route path to capture, e.g. / (default)'),
+  },
+  async ({ route }) => {
+    const result = await tools.screenshot_route(route ?? '/');
+    return {
+      content: [
+        { type: 'text', text: result.text },
+        ...result.images.map((image) => ({
+          type: 'image' as const,
+          data: image.data,
+          mimeType: image.mimeType,
+        })),
+      ],
+    };
+  },
+);
+
+server.tool(
+  'visual_diff',
+  'Compare a route screenshot against a stored baseline and return diff images.',
+  {
+    route: z
+      .string()
+      .optional()
+      .describe('Route path to compare, e.g. / (default)'),
+  },
+  async ({ route }) => {
+    const result = await tools.visual_diff(route ?? '/');
+    return {
+      content: [
+        { type: 'text', text: result.text },
+        ...result.images.map((image) => ({
+          type: 'image' as const,
+          data: image.data,
+          mimeType: image.mimeType,
+        })),
+      ],
+    };
+  },
+);
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
-main().catch((error) => {
+process.on('SIGINT', async () => {
+  await shutdownHarness();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await shutdownHarness();
+  process.exit(0);
+});
+
+main().catch(async (error) => {
+  await shutdownHarness();
   console.error(error);
   process.exit(1);
 });

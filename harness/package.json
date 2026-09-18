@@ -10,14 +10,21 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "acceptance": "tsx scripts/acceptance-test.ts"
+    "acceptance": "tsx scripts/acceptance-test.ts",
+    "acceptance:eyes": "tsx scripts/acceptance-eyes-test.ts",
+    "baseline:generate": "tsx scripts/generate-visual-baseline.ts",
+    "postinstall": "playwright install chromium"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "pixelmatch": "^7.1.0",
+    "playwright": "^1.51.1",
+    "pngjs": "^7.0.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
+    "@types/pngjs": "^6.0.5",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }

@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { getDevServerStatus } from './eyes/dev-server.js';
 import type { HarnessConfig } from './types.js';
 
 const execFileAsync = promisify(execFile);
@@ -29,6 +30,7 @@ export async function getStatus(config: HarnessConfig) {
       .filter(Boolean)
       .map((line) => line.slice(3)),
     diffStat: diffStat || '(no changes)',
+    devServer: getDevServerStatus(),
   };
 }
 

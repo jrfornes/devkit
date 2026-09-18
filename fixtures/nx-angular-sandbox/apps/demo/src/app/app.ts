@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { NxWelcome } from './nx-welcome';
+import { CatalogBanner } from './catalog-banner/catalog-banner';
 
 @Component({
-  imports: [NxWelcome],
+  imports: [CatalogBanner],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class App {
-  protected title = 'demo';
+  protected activeCount = 3;
 }

@@ -1,0 +1,29 @@
+.banner {
+  /* Seeded visual regression: should be #2ecc71 (green) */
+  background: #e74c3c;
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: system-ui, sans-serif;
+  margin: 2rem auto;
+  max-width: 640px;
+  padding: 2rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem;
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.banner h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  margin: 0;
+  opacity: 0.9;
+}

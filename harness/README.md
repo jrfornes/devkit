@@ -11,6 +11,10 @@ MCP server exposing the Phase 1 tool surface for the agentic UI dev environment.
 | `run_tests` | Run nx test suite (optional `project` filter) |
 | `lint` | Run nx lint across projects |
 | `run_skill` | Invoke a skill by name |
+| `start_dev_server` | Start the nx dev server |
+| `stop_dev_server` | Stop dev server and browser |
+| `screenshot_route` | Capture a route screenshot (returns image) |
+| `visual_diff` | Compare route to baseline (returns screenshot + diff image) |
 
 ## Configuration
 
@@ -53,11 +57,25 @@ npm run dev
 }
 ```
 
-## Acceptance test
+## Acceptance tests
 
-Runs the MVP walkthrough programmatically:
+MVP loop (test oracle):
 
 ```bash
 cd harness
 npm run acceptance
+```
+
+Eyes milestone (visual diff loop):
+
+```bash
+cd harness
+npm run acceptance:eyes
+```
+
+Generate visual baselines after intentional UI changes:
+
+```bash
+cd harness
+npm run baseline:generate
 ```
