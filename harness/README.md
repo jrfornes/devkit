@@ -93,6 +93,20 @@ cd harness
 npm run acceptance:ship
 ```
 
+Rung 1 breadth (all self-healing specimens A–E + dep):
+
+```bash
+cd harness
+npm run acceptance:rung1
+```
+
+Reset a sandbox specimen to a known bug (or `good`):
+
+```bash
+cd harness
+npm run reset-specimen -- B
+```
+
 Requires `gh` authenticated with permission to push branches and open PRs. Set
 `GITHUB_TOKEN` with repo + pull_requests scopes for `open_pr` / `ci_status`. The
 sandbox CI workflow (`.github/workflows/sandbox-ci.yml`) must be present on the
