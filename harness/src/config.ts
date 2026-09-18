@@ -7,7 +7,7 @@ import {
   loadProfileConfigFile,
   resolveProfileConfigPath,
 } from './profiles/load-profile-config.js';
-import { applyHostPath, assertWorkspaceReady } from './host-env.js';
+import { applyHostPath, assertProfileNamesReady, assertWorkspaceReady } from './host-env.js';
 import { resolveGitRoot } from './ship/git.js';
 
 applyHostPath();
@@ -46,6 +46,12 @@ export function loadConfig(options?: {
     workspaceRoot = path.resolve(
       options?.workspaceRoot ?? process.env.HARNESS_WORKSPACE ?? fileConfig.workspaceRoot,
     );
+    assertProfileNamesReady({
+      serveProject: profile.devServer.serveProject,
+      testProjects: profile.testProjects,
+      buildProjects: profile.buildProjects,
+      lintProjects: profile.lintProjects,
+    });
   } else {
     workspaceRoot = path.resolve(
       options?.workspaceRoot ??

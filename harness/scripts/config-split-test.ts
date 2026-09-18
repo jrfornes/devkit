@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from '../src/config.js';
 import { loadProfileConfigFile } from '../src/profiles/load-profile-config.js';
+import { runCommand } from '../src/runner.js';
 import { getDiff, getStatus, workspacePathspec } from '../src/workspace.js';
 
 const harnessRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -164,6 +165,38 @@ async function run() {
     });
 
     await withClearedHarnessEnv(async () => {
+      const placeholderNamesPath = path.join(targetRepo, 'placeholder-names.json');
+      fs.writeFileSync(
+        placeholderNamesPath,
+        JSON.stringify(
+          {
+            workspaceRoot: targetRepo,
+            serveProject: '<nx app name>',
+            testProjects: ['<app>', '<libs>'],
+            buildProjects: ['<app>'],
+            port: 4200,
+            baselinesDir: 'visual-baselines',
+          },
+          null,
+          2,
+        ),
+      );
+      let namesThrew = false;
+      try {
+        loadConfig({
+          repoRoot: harnessRoot,
+          profile: 'nx-angular-private',
+          profileConfigPath: placeholderNamesPath,
+        });
+      } catch (error) {
+        namesThrew =
+          error instanceof Error && error.message.includes('example placeholders');
+      }
+      assert(namesThrew, 'Placeholder nx project names should fail before spawn');
+      console.log('2d. placeholder nx project names — rejected before npx');
+    });
+
+    await withClearedHarnessEnv(async () => {
       let missingConfigThrew = false;
       try {
         loadConfig({ repoRoot: harnessRoot, profile: 'nx-angular-private' });
@@ -252,6 +285,11 @@ async function run() {
   } finally {
     fs.rmSync(targetRepo, { recursive: true, force: true });
   }
+
+  const spawnMiss = await runCommand(harnessDir, 'npx-definitely-not-installed-xyz', ['--version']);
+  assert(spawnMiss.success === false, 'Missing binaries should not crash the process');
+  assert(spawnMiss.exitCode === 127, 'Spawn ENOENT should return exit 127');
+  console.log('7. spawn ENOENT returns a tool error instead of crashing MCP');
 
   console.log('\nConfig split tests passed.');
 }

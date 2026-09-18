@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { withHostPath } from '../host-env.js';
+import { resolveLocalNx, resolveNpx, withHostPath } from '../host-env.js';
 import type { DevServerStatus, HarnessConfig } from '../types.js';
 
 let child: ChildProcess | null = null;
@@ -64,16 +64,29 @@ export async function startDevServer(config: HarnessConfig): Promise<DevServerSt
   const { serveProject, port } = config.profile.devServer;
   const url = config.profile.devServerUrl(port);
 
-  child = spawn(
-    'npx',
-    ['nx', 'serve', serveProject, `--port=${port}`, '--host=127.0.0.1'],
-    {
-      cwd: config.workspaceRoot,
-      env: withHostPath(),
-      stdio: ['ignore', 'pipe', 'pipe'],
-      detached: true,
-    },
-  );
+  const localNx = resolveLocalNx(config.workspaceRoot);
+  const command = localNx ?? resolveNpx();
+  const args = localNx
+    ? ['serve', serveProject, `--port=${port}`, '--host=127.0.0.1']
+    : ['nx', 'serve', serveProject, `--port=${port}`, '--host=127.0.0.1'];
+
+  child = spawn(command, args, {
+    cwd: config.workspaceRoot,
+    env: withHostPath(),
+    stdio: ['ignore', 'pipe', 'pipe'],
+    detached: true,
+  });
+
+  child.on('error', () => {
+    status = {
+      running: false,
+      url: null,
+      port: null,
+      project: null,
+      pid: null,
+    };
+    child = null;
+  });
 
   status = {
     running: true,
@@ -95,6 +108,14 @@ export async function startDevServer(config: HarnessConfig): Promise<DevServerSt
   });
 
   child.unref();
+
+  await sleep(150);
+  if (!status.running) {
+    throw new Error(
+      `Failed to spawn ${command} for nx serve. Run npm install in ${config.workspaceRoot} ` +
+        `and confirm npx sits next to node (${process.execPath}).`,
+    );
+  }
 
   try {
     await waitForServer(url);

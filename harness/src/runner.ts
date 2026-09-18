@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { withHostPath } from './host-env.js';
+import { resolveNpx, withHostPath } from './host-env.js';
 import type { CommandResult } from './types.js';
 
 export function runCommand(
@@ -7,8 +7,20 @@ export function runCommand(
   command: string,
   args: string[],
 ): Promise<CommandResult> {
+  const resolvedCommand = command === 'npx' ? resolveNpx() : command;
+  const displayCommand = [resolvedCommand, ...args].join(' ');
+
   return new Promise((resolve) => {
-    const child = spawn(command, args, {
+    let settled = false;
+    const finish = (result: CommandResult) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(result);
+    };
+
+    const child = spawn(resolvedCommand, args, {
       cwd,
       env: withHostPath(),
       shell: false,
@@ -17,21 +29,36 @@ export function runCommand(
     let stdout = '';
     let stderr = '';
 
-    child.stdout.on('data', (chunk: Buffer) => {
+    child.stdout?.on('data', (chunk: Buffer) => {
       stdout += chunk.toString();
     });
-    child.stderr.on('data', (chunk: Buffer) => {
+    child.stderr?.on('data', (chunk: Buffer) => {
       stderr += chunk.toString();
+    });
+
+    child.on('error', (error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      finish({
+        success: false,
+        exitCode: 127,
+        stdout,
+        stderr:
+          `${message}\n` +
+          `Failed to spawn ${resolvedCommand}. Cursor MCP often has a stripped PATH.\n` +
+          `Node bin dir should be on PATH (${process.execPath}). ` +
+          `If this is npx/nx, run npm install in the target workspace and restart MCP.`,
+        command: displayCommand,
+      });
     });
 
     child.on('close', (code) => {
       const exitCode = code ?? 1;
-      resolve({
+      finish({
         success: exitCode === 0,
         exitCode,
         stdout,
         stderr,
-        command: [command, ...args].join(' '),
+        command: displayCommand,
       });
     });
   });

@@ -14,10 +14,14 @@ const PLACEHOLDER_WORKSPACE_MARKERS = [
   '/path/to/private/repo',
 ];
 
+export function nodeBinDir(): string {
+  return path.dirname(process.execPath);
+}
+
 export function withHostPath(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
   const existing = env.PATH ?? '';
   const parts = existing.split(path.delimiter).filter(Boolean);
-  const prepend = HOST_BIN_DIRS.filter((dir) => !parts.includes(dir));
+  const prepend = [nodeBinDir(), ...HOST_BIN_DIRS].filter((dir) => !parts.includes(dir));
   return {
     ...env,
     PATH: [...prepend, ...parts].join(path.delimiter),
@@ -26,6 +30,36 @@ export function withHostPath(env: NodeJS.ProcessEnv = process.env): NodeJS.Proce
 
 export function applyHostPath(): void {
   process.env.PATH = withHostPath(process.env).PATH;
+}
+
+export function resolveNpx(): string {
+  const names = process.platform === 'win32' ? ['npx.cmd', 'npx.exe', 'npx'] : ['npx'];
+  const searchDirs = [nodeBinDir(), ...HOST_BIN_DIRS];
+  for (const dir of searchDirs) {
+    for (const name of names) {
+      const candidate = path.join(dir, name);
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+    }
+  }
+  return 'npx';
+}
+
+export function resolveLocalNx(workspaceRoot: string): string | undefined {
+  const binDir = path.join(workspaceRoot, 'node_modules', '.bin');
+  const names = process.platform === 'win32' ? ['nx.cmd', 'nx.exe', 'nx'] : ['nx'];
+  for (const name of names) {
+    const candidate = path.join(binDir, name);
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
+export function isPlaceholderToken(value: string): boolean {
+  return /<[^>]+>/.test(value);
 }
 
 export function isPlaceholderWorkspaceRoot(workspaceRoot: string): boolean {
@@ -57,4 +91,29 @@ export function assertWorkspaceReady(workspaceRoot: string): void {
   if (!fs.statSync(workspaceRoot).isDirectory()) {
     throw new Error(`workspaceRoot is not a directory: ${workspaceRoot}`);
   }
+}
+
+export function assertProfileNamesReady(options: {
+  serveProject: string;
+  testProjects?: string[];
+  buildProjects?: string[];
+  lintProjects?: string[];
+}): void {
+  const names = [
+    options.serveProject,
+    ...(options.testProjects ?? []),
+    ...(options.buildProjects ?? []),
+    ...(options.lintProjects ?? []),
+  ];
+  const placeholders = names.filter(isPlaceholderToken);
+  if (placeholders.length === 0) {
+    return;
+  }
+
+  throw new Error(
+    `Profile still has example placeholders: ${placeholders.join(', ')}\n` +
+      'In the private checkout run `npx nx show projects` and put the real names in ' +
+      'harness/profiles/nx-angular-private.local.json (serveProject, testProjects, buildProjects). ' +
+      'Then restart the MCP server.',
+  );
 }

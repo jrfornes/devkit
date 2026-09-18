@@ -137,9 +137,9 @@ GUI-launched MCP processes often lack Homebrew `git`; include PATH (or
 }
 ```
 
-`open_pr` / `ci_status` then use the **private** GitHub repo (via `gh` in that
-checkout), not `jrfornes/devkit`. Keep the sandbox profile as the default so
-CI/acceptance stay green.
+Fill in real nx project names from the private checkout (`npx nx show projects`) —
+do not leave `"<app>"` / `"<nx app name>"`. Run `npm install` in that checkout so
+`node_modules/.bin/nx` exists. The harness prefers that local `nx` over `npx`.
 
 Generate a visual baseline in the **target** repo (sandbox still patches the
 catalog-banner specimen; private captures the current route as-is):
