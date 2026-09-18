@@ -2,6 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { loadConfig } from './config.js';
 import { startDevServer, stopDevServer } from './eyes/dev-server.js';
+import { interact, runInteractionTest } from './eyes/interaction.js';
+import type { BrowserAction } from './eyes/interaction-types.js';
 import { closeBrowser, screenshotRoute } from './eyes/screenshot.js';
 import { visualDiff } from './eyes/visual-diff.js';
 import { formatCommandResult, runCommand } from './runner.js';
@@ -29,6 +31,8 @@ export interface ToolHandlers {
   stop_dev_server: () => Promise<string>;
   screenshot_route: (route?: string) => Promise<ScreenshotToolResult>;
   visual_diff: (route?: string) => Promise<VisualDiffToolResult>;
+  interact: (route: string, actions: BrowserAction[]) => Promise<InteractToolResult>;
+  run_interaction_test: (name: string) => Promise<InteractionTestToolResult>;
   open_pr: (options: OpenPrOptions) => Promise<string>;
   ci_status: (options: { branch?: string; prUrl?: string }) => Promise<string>;
 }
@@ -39,6 +43,16 @@ export interface ScreenshotToolResult {
 }
 
 export interface VisualDiffToolResult {
+  text: string;
+  images: ImagePayload[];
+}
+
+export interface InteractToolResult {
+  text: string;
+  images: ImagePayload[];
+}
+
+export interface InteractionTestToolResult {
   text: string;
   images: ImagePayload[];
 }
@@ -159,6 +173,44 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
 
       return {
         text: formatVisualDiffSummary(result),
+        images,
+      };
+    },
+
+    async interact(route, actions) {
+      const result = await interact(config, route, actions);
+      return {
+        text: JSON.stringify(
+          {
+            route: result.route,
+            url: result.url,
+            actionLog: result.actionLog,
+            screenshot: 'attached',
+          },
+          null,
+          2,
+        ),
+        images: [result.screenshot],
+      };
+    },
+
+    async run_interaction_test(name) {
+      const result = await runInteractionTest(config, name);
+      const images = result.screenshot ? [result.screenshot] : [];
+      return {
+        text: JSON.stringify(
+          {
+            name: result.name,
+            route: result.route,
+            url: result.url,
+            passed: result.passed,
+            actionLog: result.actionLog,
+            failureReason: result.failureReason,
+            screenshot: result.screenshot ? 'attached' : undefined,
+          },
+          null,
+          2,
+        ),
         images,
       };
     },

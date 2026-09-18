@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 
 @Component({
   selector: 'app-catalog-banner',
@@ -7,4 +7,9 @@ import { Component, input } from '@angular/core';
 })
 export class CatalogBanner {
   readonly activeCount = input(3);
+  readonly displayedCount = signal(this.activeCount());
+
+  refreshCount(): void {
+    this.displayedCount.update((count) => count + 1);
+  }
 }

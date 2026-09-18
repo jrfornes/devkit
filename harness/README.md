@@ -17,6 +17,8 @@ MCP server exposing the Phase 1 tool surface for the agentic UI dev environment.
 | `stop_dev_server` | Stop dev server and browser |
 | `screenshot_route` | Capture a route screenshot (returns image) |
 | `visual_diff` | Compare route to baseline (returns screenshot + diff image) |
+| `interact` | Drive Playwright actions on a route (returns screenshot + action log) |
+| `run_interaction_test` | Run a workspace interaction test spec (pass/fail + failure screenshot) |
 | `open_pr` | Commit workspace changes, push branch, open pull request |
 | `ci_status` | Report CI check status for a branch or PR URL |
 
@@ -78,6 +80,13 @@ Eyes milestone (visual diff loop):
 ```bash
 cd harness
 npm run acceptance:eyes
+```
+
+Interaction tests (browser actions + assertions):
+
+```bash
+cd harness
+npm run acceptance:interaction
 ```
 
 Generate visual baselines after intentional UI changes:

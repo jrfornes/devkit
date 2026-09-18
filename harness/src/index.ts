@@ -11,7 +11,7 @@ const tools = createToolHandlers(config);
 
 const server = new McpServer({
   name: 'agentic-ui-dev-harness',
-  version: '0.3.0',
+  version: '0.4.0',
 });
 
 server.tool(
@@ -142,6 +142,74 @@ server.tool(
   },
   async ({ route }) => {
     const result = await tools.visual_diff(route ?? '/');
+    return {
+      content: [
+        { type: 'text', text: result.text },
+        ...result.images.map((image) => ({
+          type: 'image' as const,
+          data: image.data,
+          mimeType: image.mimeType,
+        })),
+      ],
+    };
+  },
+);
+
+const browserActionSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('click'),
+    selector: z.string(),
+  }),
+  z.object({
+    type: z.literal('fill'),
+    selector: z.string(),
+    value: z.string(),
+  }),
+  z.object({
+    type: z.literal('wait'),
+    ms: z.number(),
+  }),
+  z.object({
+    type: z.literal('waitForSelector'),
+    selector: z.string(),
+  }),
+  z.object({
+    type: z.literal('screenshot'),
+  }),
+]);
+
+server.tool(
+  'interact',
+  'Drive Playwright browser actions on a route and return the final screenshot.',
+  {
+    route: z.string().describe('Route path to open, e.g. /'),
+    actions: z
+      .array(browserActionSchema)
+      .describe('Ordered list of browser actions to execute'),
+  },
+  async ({ route, actions }) => {
+    const result = await tools.interact(route, actions);
+    return {
+      content: [
+        { type: 'text', text: result.text },
+        ...result.images.map((image) => ({
+          type: 'image' as const,
+          data: image.data,
+          mimeType: image.mimeType,
+        })),
+      ],
+    };
+  },
+);
+
+server.tool(
+  'run_interaction_test',
+  'Run a predefined interaction test script from the workspace interaction-tests directory.',
+  {
+    name: z.string().describe('Interaction test name, e.g. catalog-banner'),
+  },
+  async ({ name }) => {
+    const result = await tools.run_interaction_test(name);
     return {
       content: [
         { type: 'text', text: result.text },
