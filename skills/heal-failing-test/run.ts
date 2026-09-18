@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { formatCommandResult } from '../runner.js';
-import type { SkillContext, SkillResult } from '../types.js';
+import { formatCommandResult } from '../../harness/src/runner.js';
+import type { SkillContext, SkillResult } from '../../harness/src/types.js';
 
 const IMPLEMENTATION = 'libs/shared-data/src/lib/item-filter.ts';
 

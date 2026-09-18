@@ -1,3 +1,14 @@
+---
+name: heal-visual-regression
+description: Fix a visual regression detected by visual_diff
+triggers:
+  - visual regression
+  - visual diff failure
+  - screenshot mismatch
+oracle:
+  - visual_diff
+---
+
 # heal-visual-regression
 
 Fix a visual regression detected by `visual_diff`.

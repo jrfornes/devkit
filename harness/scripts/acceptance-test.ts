@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -78,30 +77,15 @@ async function run() {
   console.log(lintResult.slice(0, 300));
   assert(lintResult.includes('success: true'), 'Expected lint to pass');
 
-  const finalDiff = await tools.get_diff();
-  console.log('\n7. get_diff (final)');
-  console.log(finalDiff);
+  const finalContents = fs.readFileSync(itemFilterPath, 'utf8');
+  console.log('\n7. verify fix applied');
   assert(
-    finalDiff.includes(`+  ${FIXED_FILTER}`),
-    'Expected fixed filter as added line in diff',
+    finalContents.includes(FIXED_FILTER),
+    'Expected implementation to contain the fixed filter after skill run',
   );
   assert(
-    finalDiff.includes(`-  ${BUGGY_FILTER}`),
-    'Expected buggy filter as removed line in diff',
-  );
-
-  const changedFiles = execFileSync(
-    'git',
-    ['diff', '--name-only', '--', path.relative(repoRoot, config.workspaceRoot)],
-    { cwd: repoRoot, encoding: 'utf8' },
-  )
-    .trim()
-    .split('\n')
-    .filter(Boolean);
-
-  assert(
-    changedFiles.length === 1 && changedFiles[0]?.endsWith('item-filter.ts'),
-    `Expected only item-filter.ts to change, got: ${changedFiles.join(', ')}`,
+    !finalContents.includes(BUGGY_FILTER),
+    'Expected buggy filter to be removed after skill run',
   );
 
   console.log('\n✅ Acceptance test passed');

@@ -26,6 +26,7 @@ Maps straight onto Rungs 0–1 of the [roadmap](./ROADMAP.md).
 - `visual_diff` — diff a route against a baseline, return the diff image
 
 **Skills:**
+- `list_skills` — list discoverable skills with metadata from SKILL.md frontmatter
 - `run_skill` — invoke a skill by name
 
 **State (read):**

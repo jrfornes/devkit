@@ -70,6 +70,15 @@ server.tool(
 );
 
 server.tool(
+  'list_skills',
+  'List discoverable skills with name, description, triggers, and oracle from SKILL.md frontmatter.',
+  {},
+  async () => ({
+    content: [{ type: 'text', text: await tools.list_skills() }],
+  }),
+);
+
+server.tool(
   'run_skill',
   'Invoke a named skill from the skills library.',
   {
