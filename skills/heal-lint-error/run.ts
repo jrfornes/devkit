@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { formatCommandResult } from '../runner.js';
-import type { SkillContext, SkillResult } from '../types.js';
+import { formatCommandResult } from '../../harness/src/runner.js';
+import type { SkillContext, SkillResult } from '../../harness/src/types.js';
 
 const LINT_SPECIMEN = 'libs/shared-data/src/lib/lint-specimen.ts';
 const UNUSED_IMPORT = "import { CatalogItem } from './item-filter';\n";

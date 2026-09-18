@@ -11,6 +11,7 @@ MCP server exposing the Phase 1 tool surface for the agentic UI dev environment.
 | `run_tests` | Run nx test suite (optional `project` filter) |
 | `run_build` | Run nx build for profile default project(s) |
 | `lint` | Run nx lint across projects |
+| `list_skills` | List discoverable skills with metadata from SKILL.md |
 | `run_skill` | Invoke a skill by name |
 | `start_dev_server` | Start the nx dev server |
 | `stop_dev_server` | Stop dev server and browser |
@@ -91,6 +92,13 @@ Ship loop (build → PR → CI):
 ```bash
 cd harness
 npm run acceptance:ship
+```
+
+Skill discovery (dynamic load):
+
+```bash
+cd harness
+npm run acceptance:skills
 ```
 
 Rung 1 breadth (all self-healing specimens A–E + dep):

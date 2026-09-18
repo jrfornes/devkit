@@ -1,3 +1,14 @@
+---
+name: heal-failing-test
+description: Fix a non-visual test failure in the target workspace
+triggers:
+  - test failure
+  - failing spec
+  - jest failure
+oracle:
+  - run_tests
+---
+
 # heal-failing-test
 
 Fix a non-visual test failure in the target workspace.

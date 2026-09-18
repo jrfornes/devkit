@@ -7,7 +7,7 @@ import { visualDiff } from './eyes/visual-diff.js';
 import { formatCommandResult, runCommand } from './runner.js';
 import { getCiStatus } from './ship/ci-status.js';
 import { openPullRequest } from './ship/open-pr.js';
-import { getSkill } from './skills/registry.js';
+import { getSkill, listSkillSummaries, SkillNotFoundError } from './skills/registry.js';
 import { getDiff, getStatus } from './workspace.js';
 import type {
   HarnessConfig,
@@ -24,6 +24,7 @@ export interface ToolHandlers {
   run_build: (project?: string) => Promise<string>;
   lint: () => Promise<string>;
   run_skill: (name: string) => Promise<string>;
+  list_skills: () => Promise<string>;
   start_dev_server: () => Promise<string>;
   stop_dev_server: () => Promise<string>;
   screenshot_route: (route?: string) => Promise<ScreenshotToolResult>;
@@ -93,17 +94,37 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
     },
 
     async run_skill(name) {
-      const skillMdPath = path.join(config.skillsDir, name, 'SKILL.md');
-      const skillDoc = await fs.readFile(skillMdPath, 'utf8').catch(() => null);
-      const run = getSkill(name);
-      const result = await run(createSkillContext(config));
+      try {
+        const { runner } = await getSkill(config.skillsDir, name);
+        const skillMdPath = path.join(config.skillsDir, name, 'SKILL.md');
+        const skillDoc = await fs.readFile(skillMdPath, 'utf8').catch(() => null);
+        const result = await runner(createSkillContext(config));
 
-      const payload = {
-        skill: name,
-        documentation: skillDoc,
-        ...result,
-      };
-      return JSON.stringify(payload, null, 2);
+        const payload = {
+          skill: name,
+          documentation: skillDoc,
+          ...result,
+        };
+        return JSON.stringify(payload, null, 2);
+      } catch (error) {
+        if (error instanceof SkillNotFoundError) {
+          return JSON.stringify(
+            {
+              success: false,
+              error: error.message,
+              availableSkills: error.availableSkills,
+            },
+            null,
+            2,
+          );
+        }
+        throw error;
+      }
+    },
+
+    async list_skills() {
+      const skills = await listSkillSummaries(config.skillsDir);
+      return JSON.stringify(skills, null, 2);
     },
 
     async start_dev_server() {

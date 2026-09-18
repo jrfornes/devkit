@@ -1,3 +1,14 @@
+---
+name: heal-lint-error
+description: Fix lint failures in the target workspace
+triggers:
+  - lint failure
+  - eslint error
+  - unused import
+oracle:
+  - lint
+---
+
 # heal-lint-error
 
 Fix lint failures in the target workspace.

@@ -1,3 +1,14 @@
+---
+name: bump-dependency
+description: Update an outdated dependency to a supported version
+triggers:
+  - dependency version failure
+  - outdated package
+  - npm version mismatch
+oracle:
+  - run_tests
+---
+
 # bump-dependency
 
 Update an outdated dependency to a supported version.

@@ -1,3 +1,14 @@
+---
+name: heal-build-error
+description: Fix build failures in the target workspace
+triggers:
+  - build failure
+  - compile error
+  - template error
+oracle:
+  - run_build
+---
+
 # heal-build-error
 
 Fix build failures in the target workspace.

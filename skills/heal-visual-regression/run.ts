@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { visualDiff } from '../eyes/visual-diff.js';
-import type { SkillContext, SkillResult } from '../types.js';
+import { visualDiff } from '../../harness/src/eyes/visual-diff.js';
+import type { SkillContext, SkillResult } from '../../harness/src/types.js';
 
 const CATALOG_BANNER_CSS = 'apps/demo/src/app/catalog-banner/catalog-banner.css';
 const BUGGY_BACKGROUND = 'background: #e74c3c;';
