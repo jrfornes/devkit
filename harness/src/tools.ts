@@ -5,11 +5,14 @@ import { startDevServer, stopDevServer } from './eyes/dev-server.js';
 import { closeBrowser, screenshotRoute } from './eyes/screenshot.js';
 import { visualDiff } from './eyes/visual-diff.js';
 import { formatCommandResult, runCommand } from './runner.js';
+import { getCiStatus } from './ship/ci-status.js';
+import { openPullRequest } from './ship/open-pr.js';
 import { getSkill } from './skills/registry.js';
 import { getDiff, getStatus } from './workspace.js';
 import type {
   HarnessConfig,
   ImagePayload,
+  OpenPrOptions,
   SkillContext,
   VisualDiffResult,
 } from './types.js';
@@ -18,12 +21,15 @@ export interface ToolHandlers {
   status: () => Promise<string>;
   get_diff: () => Promise<string>;
   run_tests: (project?: string) => Promise<string>;
+  run_build: (project?: string) => Promise<string>;
   lint: () => Promise<string>;
   run_skill: (name: string) => Promise<string>;
   start_dev_server: () => Promise<string>;
   stop_dev_server: () => Promise<string>;
   screenshot_route: (route?: string) => Promise<ScreenshotToolResult>;
   visual_diff: (route?: string) => Promise<VisualDiffToolResult>;
+  open_pr: (options: OpenPrOptions) => Promise<string>;
+  ci_status: (options: { branch?: string; prUrl?: string }) => Promise<string>;
 }
 
 export interface ScreenshotToolResult {
@@ -73,6 +79,11 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
 
     async run_tests(project) {
       const result = await config.profile.runTests(config.workspaceRoot, project);
+      return formatCommandResult(result);
+    },
+
+    async run_build(project) {
+      const result = await config.profile.runBuild(config.workspaceRoot, project);
       return formatCommandResult(result);
     },
 
@@ -129,6 +140,20 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
         text: formatVisualDiffSummary(result),
         images,
       };
+    },
+
+    async open_pr(options) {
+      const result = await openPullRequest(config, options);
+      return JSON.stringify(result, null, 2);
+    },
+
+    async ci_status(options) {
+      const result = await getCiStatus({
+        repoRoot: config.repoRoot,
+        branch: options.branch,
+        prUrl: options.prUrl,
+      });
+      return JSON.stringify(result, null, 2);
     },
   };
 }

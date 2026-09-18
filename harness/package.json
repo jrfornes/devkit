@@ -12,6 +12,7 @@
     "dev": "tsx src/index.ts",
     "acceptance": "tsx scripts/acceptance-test.ts",
     "acceptance:eyes": "tsx scripts/acceptance-eyes-test.ts",
+    "acceptance:ship": "tsx scripts/acceptance-ship-test.ts",
     "baseline:generate": "tsx scripts/generate-visual-baseline.ts",
     "postinstall": "playwright install chromium"
   },
