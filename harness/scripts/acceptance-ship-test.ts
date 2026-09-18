@@ -27,7 +27,7 @@ const startingBranch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD']
   encoding: 'utf8',
 }).trim();
 
-function resetFixture() {
+function seedFailure() {
   const contents = fs.readFileSync(itemFilterPath, 'utf8');
   if (contents.includes(BUGGY_FILTER)) {
     return;
@@ -37,6 +37,16 @@ function resetFixture() {
     return;
   }
   throw new Error('Fixture is not in a recognized filterActiveItems state.');
+}
+
+function restoreFixture() {
+  const contents = fs.readFileSync(itemFilterPath, 'utf8');
+  if (contents.includes(FIXED_FILTER)) {
+    return;
+  }
+  if (contents.includes(BUGGY_FILTER)) {
+    fs.writeFileSync(itemFilterPath, contents.replace(BUGGY_FILTER, FIXED_FILTER), 'utf8');
+  }
 }
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -51,13 +61,13 @@ async function cleanup(prUrl?: string) {
   }
   await deleteRemoteBranch(repoRoot, branchName).catch(() => undefined);
   await checkoutBranch(repoRoot, startingBranch).catch(() => undefined);
-  resetFixture();
+  restoreFixture();
 }
 
 async function run() {
   console.log('Acceptance test: ship loop (build → PR → CI)\n');
 
-  resetFixture();
+  seedFailure();
 
   const skillResult = await tools.run_skill('heal-failing-test');
   console.log('1. run_skill heal-failing-test');
