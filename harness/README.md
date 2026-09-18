@@ -24,14 +24,34 @@ MCP server exposing the Phase 1 tool surface for the agentic UI dev environment.
 
 ## Configuration
 
-Environment variables:
+Two roots, not one:
 
-- `HARNESS_REPO_ROOT` — repo root (default: parent of `harness/`)
-- `HARNESS_WORKSPACE` — target workspace path (default: `fixtures/nx-angular-sandbox`)
-- `HARNESS_PROFILE` — project profile name (default: `nx-angular`)
+| Root | Env | What lives there |
+|------|-----|------------------|
+| **Harness** | `HARNESS_REPO_ROOT` | This repo: `skills/`, MCP server, profiles. Default: parent of `harness/`. |
+| **Target** | `HARNESS_WORKSPACE` | The nx app the tools test/lint/build/serve. Default: `fixtures/nx-angular-sandbox`. |
+
+`status`, `get_diff`, `open_pr`, and `ci_status` git against the **target's** git
+repo (discovered via `git rev-parse --show-toplevel` from the workspace). Skills
+always load from the harness. Do not point `HARNESS_REPO_ROOT` at the private
+app — that makes ship and skills fight each other.
+
+Other environment variables:
+
+- `HARNESS_PROFILE` — `nx-angular` (default, sandbox) or `nx-angular-private`
+- `HARNESS_PROFILE_CONFIG` — path to a gitignored JSON profile (required for `nx-angular-private`)
+- `HARNESS_GIT_ROOT` — override git toplevel (rarely needed)
 - `HARNESS_FORGE` — forge provider (default: `github`)
 - `HARNESS_BASE_BRANCH` — default base branch for `open_pr` (default: `main`)
-- `GITHUB_TOKEN` — required for `open_pr` and `ci_status` (repo + pull_requests scopes)
+- `HARNESS_GITHUB_REPO` — optional `owner/name` override; otherwise `gh` uses the target repo
+- `GITHUB_TOKEN` — required for `open_pr` and `ci_status` (repo + pull_requests scopes **on the target GitHub repo**)
+
+Print the resolved split:
+
+```bash
+cd harness
+npm run print-config
+```
 
 ## Setup
 
@@ -50,20 +70,77 @@ cd harness
 npm run dev
 ```
 
-### Cursor / Claude Desktop config
+### Cursor / Claude Desktop config (sandbox)
 
 ```json
 {
   "mcpServers": {
     "agentic-ui-dev": {
       "command": "node",
-      "args": ["/absolute/path/to/repo/harness/dist/index.js"],
+      "args": ["/absolute/path/to/devkit/harness/dist/index.js"],
       "env": {
-        "HARNESS_WORKSPACE": "/absolute/path/to/repo/fixtures/nx-angular-sandbox"
+        "HARNESS_REPO_ROOT": "/absolute/path/to/devkit",
+        "HARNESS_WORKSPACE": "/absolute/path/to/devkit/fixtures/nx-angular-sandbox"
       }
     }
   }
 }
+```
+
+### Point at a private checkout (M6)
+
+Do **not** copy the private app into this repo. Clone it next to `devkit`,
+`npm install` there, then copy the example profile:
+
+```bash
+cp harness/profiles/nx-angular-private.example.json \
+   harness/profiles/nx-angular-private.local.json
+```
+
+Fill in real values (`nx show projects` in the private checkout):
+
+```json
+{
+  "workspaceRoot": "/absolute/path/to/private/repo",
+  "serveProject": "<nx app name>",
+  "testProjects": ["<app>", "<libs>"],
+  "buildProjects": ["<app>"],
+  "port": 4200,
+  "baselinesDir": "visual-baselines"
+}
+```
+
+`*.local.json` is gitignored. Point Cursor's MCP env at that checkout:
+
+```json
+{
+  "mcpServers": {
+    "agentic-ui-dev": {
+      "command": "node",
+      "args": ["/absolute/path/to/devkit/harness/dist/index.js"],
+      "env": {
+        "HARNESS_REPO_ROOT": "/absolute/path/to/devkit",
+        "HARNESS_PROFILE": "nx-angular-private",
+        "HARNESS_PROFILE_CONFIG": "/absolute/path/to/devkit/harness/profiles/nx-angular-private.local.json",
+        "GITHUB_TOKEN": "<token with access to the private GitHub repo>"
+      }
+    }
+  }
+}
+```
+
+`open_pr` / `ci_status` then use the **private** GitHub repo (via `gh` in that
+checkout), not `jrfornes/devkit`. Keep the sandbox profile as the default so
+CI/acceptance stay green.
+
+Generate a visual baseline in the **target** repo (sandbox still patches the
+catalog-banner specimen; private captures the current route as-is):
+
+```bash
+cd harness
+npm run baseline:generate
+# or a specific route:
+npx tsx scripts/generate-visual-baseline.ts /some-route
 ```
 
 ## Acceptance tests
@@ -115,6 +192,13 @@ Rung 1 breadth (all self-healing specimens A–E + dep):
 ```bash
 cd harness
 npm run acceptance:rung1
+```
+
+Harness vs target root split (no private clone required):
+
+```bash
+cd harness
+npm run test:config
 ```
 
 Reset a sandbox specimen to a known bug (or `good`):

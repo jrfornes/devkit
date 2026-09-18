@@ -42,7 +42,8 @@ never learns about nx or Angular specifically — the nx-angular profile does.
 
 The harness is pointed at a **target workspace**, and which one — the
 [sandbox fixture](./SANDBOX.md) now, your real repo later — is config, not code.
-So porting isn't "grab the code," it's **point at the real repo + write its
+Skills stay in the harness repo; git, tests, and PRs follow the target. So
+porting isn't "grab the code," it's **point at the real repo + write its
 profile.** This is the seam that keeps the eventual "grab it into my project" a
 configuration change instead of surgery.
 

@@ -10,3 +10,4 @@ fixtures/nx-angular-sandbox/tmp/
 
 harness/node_modules/
 harness/dist/
+harness/profiles/*.local.json

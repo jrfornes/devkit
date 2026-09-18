@@ -20,13 +20,19 @@ export interface ProjectProfile {
   lint: (workspaceRoot: string) => Promise<CommandResult>;
   devServerUrl: (port?: number) => string;
   routeToBaselineName: (route: string) => string;
+  testProjects?: string[];
   buildProjects?: string[];
+  lintProjects?: string[];
   defaultBaseBranch?: string;
 }
 
 export interface HarnessConfig {
+  /** Harness checkout: `skills/`, MCP server, profiles. Not the target app. */
   repoRoot: string;
+  /** Target nx workspace: tests, lint, build, eyes, baselines. */
   workspaceRoot: string;
+  /** Git repo that contains `workspaceRoot` — used by status / diff / open_pr / ci_status. */
+  gitRoot: string;
   profile: ProjectProfile;
   skillsDir: string;
 }

@@ -15,20 +15,20 @@ and suggested file layout. Plans are ordered by dependency, not calendar time.
 | MCP server (local) | ✅ | `harness/src/index.ts` |
 | CI oracle | ✅ | `run_tests`, `lint`, `run_build` |
 | Eyes (local) | ✅ | `start/stop_dev_server`, `screenshot_route`, `visual_diff` |
-| Skills (specimen-specific) | ✅ | `heal-failing-test`, `heal-visual-regression` |
-| nx-angular profile | ✅ | Local checkout |
-| Sandbox fixture | ✅ | Specimen B (test) + catalog banner (visual) |
-| Acceptance tests | ✅ | `acceptance`, `acceptance:eyes`, `acceptance:ship` |
+| Skills (discoverable) | ✅ | M4: runtime load from `skills/` + `list_skills` |
+| Rung 1 specimens | ✅ | M3: A–E + dep bump; `acceptance:rung1` |
+| nx-angular profile | ✅ | Sandbox default; M6 adds JSON-backed `nx-angular-private` |
+| Sandbox fixture | ✅ | In-tree; not a submodule (M6 decision) |
+| Acceptance tests | ✅ | `acceptance`, `acceptance:eyes`, `acceptance:ship`, `acceptance:skills`, `acceptance:rung1` |
 | Docker / container | ❌ dropped | Local checkout is the environment; M2 cancelled |
-| `run_build` | ✅ | nx-angular profile |
-| `open_pr` / CI | ✅ | GitHub via REST/`gh`; `ci_status` polls checks |
-| Interaction tests | ❌ | |
-| Skill discovery | ❌ | Hardcoded registry |
+| `run_build` / `open_pr` / CI | ✅ | M1: GitHub via REST/`gh`; git follows **target** repo as of M6 |
+| Interaction tests | ❌ | M5 not started; not a blocker for M6 |
 | Metrics | ❌ | [METRICS.md](../METRICS.md) not written |
 | Agentic UI (Phase 2) | ❌ | |
 
 Phase 1 **done-when** (from roadmap): Rungs 0–2 working end-to-end through an MCP
-host. We are roughly at **Rung 0 (local)** + **Rung 1 (two specimens only)**.
+host. We are at **Rung 0 (local)** + **Rung 1 (sandbox specimens)** + **Rung 2
+(skill discovery)**. M6 is the first non-sandbox target, spiked locally.
 
 ---
 

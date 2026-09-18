@@ -1,5 +1,5 @@
-import path from 'node:path';
 import type { HarnessConfig, OpenPrOptions, OpenPrResult } from '../types.js';
+import { workspacePathspec } from '../workspace.js';
 import {
   checkoutBranch,
   commit,
@@ -16,8 +16,9 @@ export async function openPullRequest(
   input: OpenPrOptions,
 ): Promise<OpenPrResult> {
   const options = buildOpenPrOptions(input, config.profile.defaultBaseBranch);
-  const workspaceRelative = path.relative(config.repoRoot, config.workspaceRoot) || '.';
-  const dirtyFiles = await getDirtyFiles(config.repoRoot, workspaceRelative);
+  const gitRoot = config.gitRoot;
+  const workspaceRelative = workspacePathspec(config);
+  const dirtyFiles = await getDirtyFiles(gitRoot, workspaceRelative);
 
   if (dirtyFiles.length === 0) {
     return {
@@ -26,17 +27,17 @@ export async function openPullRequest(
     };
   }
 
-  const originalBranch = await getCurrentBranch(config.repoRoot);
+  const originalBranch = await getCurrentBranch(gitRoot);
 
   try {
-    await createBranch(config.repoRoot, options.branchName);
-    await stagePaths(config.repoRoot, dirtyFiles);
-    const commitSha = await commit(config.repoRoot, options.commitMessage);
-    await push(config.repoRoot, options.branchName);
+    await createBranch(gitRoot, options.branchName);
+    await stagePaths(gitRoot, dirtyFiles);
+    const commitSha = await commit(gitRoot, options.commitMessage);
+    await push(gitRoot, options.branchName);
 
     const provider = await loadPullRequestProvider();
     const result = await provider.createPullRequest({
-      repoRoot: config.repoRoot,
+      repoRoot: gitRoot,
       branch: options.branchName,
       baseBranch: options.baseBranch,
       title: options.title,
@@ -56,6 +57,6 @@ export async function openPullRequest(
       branch: options.branchName,
     };
   } finally {
-    await checkoutBranch(config.repoRoot, originalBranch).catch(() => undefined);
+    await checkoutBranch(gitRoot, originalBranch).catch(() => undefined);
   }
 }
