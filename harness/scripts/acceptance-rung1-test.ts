@@ -12,6 +12,9 @@ interface SpecimenCase {
   id: string;
   skill: string;
   oracle: 'run_tests' | 'lint' | 'run_build';
+  /** Files that must differ from HEAD after seeding the specimen bug. */
+  seededFiles?: string[];
+  /** Files reported changed by the skill after healing. */
   expectedFiles: string[];
 }
 
@@ -50,6 +53,7 @@ const specimens: SpecimenCase[] = [
     id: 'dep',
     skill: 'bump-dependency',
     oracle: 'run_tests',
+    seededFiles: ['package.json'],
     expectedFiles: ['package.json', 'package-lock.json'],
   },
 ];
@@ -111,14 +115,15 @@ async function runSpecimen(specimen: SpecimenCase) {
     seededFiles.length > 0,
     `[${specimen.id}] Expected seeded specimen to change workspace files`,
   );
-  for (const expected of specimen.expectedFiles) {
+  const seedExpectations = specimen.seededFiles ?? specimen.expectedFiles;
+  for (const expected of seedExpectations) {
     assert(
       seededFiles.some((file) => file.endsWith(expected)),
       `[${specimen.id}] Expected ${expected} in seeded diff, got: ${seededFiles.join(', ')}`,
     );
   }
   const collateralAtSeed = seededFiles.filter(
-    (file) => !specimen.expectedFiles.some((expected) => file.endsWith(expected)),
+    (file) => !seedExpectations.some((expected) => file.endsWith(expected)),
   );
   assert(
     collateralAtSeed.length === 0,
