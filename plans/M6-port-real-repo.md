@@ -140,9 +140,10 @@ machine against the private checkout. Step 4 is already decided.
    }
    ```
 
-7. Restart the MCP server. Confirm with `npm run print-config` in `harness/`:
-   `repoRoot` is `devkit`, `workspaceRoot` / `gitRoot` are the private checkout,
-   `skillsDir` is still `devkit/skills`.
+7. In `harness/`, `npm install && npm run build`. Confirm `harness/dist/index.js`
+   exists (not `dist/src/index.js`). Restart the MCP server. Confirm with
+   `npm run print-config`: `repoRoot` is `devkit`, `workspaceRoot` / `gitRoot`
+   are the private checkout, `skillsDir` is still `devkit/skills`.
 
 ### Step 3 — Spike the three acceptance boxes, in order
 

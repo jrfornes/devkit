@@ -57,8 +57,9 @@ npm run print-config
 # Install fixture dependencies
 cd fixtures/nx-angular-sandbox && npm install
 
-# Install harness dependencies
+# Install harness dependencies (emits harness/dist/index.js)
 cd ../../harness && npm install && npm run build
+ls dist/index.js
 ```
 
 ## Run the MCP server
@@ -66,6 +67,15 @@ cd ../../harness && npm install && npm run build
 ```bash
 cd harness
 npm run dev
+```
+
+`npm run build` must leave `harness/dist/index.js` (the MCP `command` path below).
+If you previously built with the old layout, delete `harness/dist` and rebuild.
+To skip the emit and run TypeScript directly:
+
+```bash
+cd harness
+npx tsx src/index.ts
 ```
 
 ### Cursor / Claude Desktop config (sandbox)
