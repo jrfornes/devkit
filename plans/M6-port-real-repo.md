@@ -5,7 +5,7 @@
 ## Goal
 
 Validate [SANDBOX.md](../SANDBOX.md) port story: **point at the real repo + write
-its profile** — skills, server, container, eyes stay put.
+its profile** — skills, server, eyes stay put.
 
 ## Done when
 
@@ -113,4 +113,3 @@ SANDBOX.md                        (decision update)
 ## Depends on
 
 - M1 — ship loop on real repo PRs
-- M2 — container with private repo mount + credentials

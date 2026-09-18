@@ -2,22 +2,23 @@
 
 ## The stack, layer by layer
 
-**Base image** — reproducible per project, everything pinned (runtime, dev
-server, browser, test runner). This is the boring part and should stay boring.
+**Pinned local toolchain** — Node, nx, Playwright, test runner, all on the host
+and pinned per project. This is the boring part and should stay boring.
 
-**Skills** — mounted into the container and discoverable by the agent. The
-leverage point; see [README](./README.md#skills-are-the-flywheel).
+**Skills** — live in the repo under `skills/` and are discoverable by the agent.
+The leverage point; see [README](./README.md#skills-are-the-flywheel).
 
-**Agent runtime** — the thing running inside the container with `bash`,
+**Agent runtime** — the thing running against the local workspace with `bash`,
 file-edit, and browser-control tools.
 
 **The eyes** — dev server + headless browser + screenshot/visual-diff. What lets
 the agent verify UI work instead of guessing. Without this layer the whole thing
 degrades into plausible-but-broken diffs.
 
-**Container lifecycle** — spin up a workspace per branch, tools operate against
-it, tear it down. MCP-first removes the *UI* for this, not the thing itself: the
-tools are stateless-ish, the container holds the state. See [MCP.md](./MCP.md).
+**Workspace** — a configured local checkout the tools operate against. Isolation
+is a git branch on that checkout, not a container. MCP-first removes the *UI*
+for orchestration, not the workspace itself: the tools are stateless-ish, the
+working tree holds the state. See [MCP.md](./MCP.md).
 
 **MCP tool surface** — the substrate exposed as a set of meaningful verbs
 (`run_tests`, `screenshot_route`, `run_skill`, `open_pr`, …). This is the stable
@@ -39,7 +40,7 @@ The tool verbs are stack-agnostic; *how* to build, test, lint, and serve a given
 workspace is configuration held in a thin **project profile**. The harness core
 never learns about nx or Angular specifically — the nx-angular profile does.
 
-The container mounts a **target workspace**, and which one — the
+The harness is pointed at a **target workspace**, and which one — the
 [sandbox fixture](./SANDBOX.md) now, your real repo later — is config, not code.
 So porting isn't "grab the code," it's **point at the real repo + write its
 profile.** This is the seam that keeps the eventual "grab it into my project" a
@@ -60,12 +61,12 @@ flowchart TB
         verbs["run_tests · run_build · lint · start_dev_server<br/>screenshot_route · visual_diff · run_skill<br/>get_diff · status · open_pr"]
     end
 
-    subgraph Container["Per-project Docker container"]
-        subgraph Runtime["Agent runtime + lifecycle"]
+    subgraph Workspace["Local project workspace"]
+        subgraph Runtime["Agent runtime + working tree"]
             tools["bash · file-edit · browser-control"]
-            lifecycle["Workspace lifecycle<br/>spin up per branch · tear down"]
+            lifecycle["Git branch + checkout<br/>tools operate against the workspace"]
         end
-        subgraph Skills["Skill library (mounted, discoverable)"]
+        subgraph Skills["Skill library (discoverable)"]
             skill1["heal-failing-test"]
             skill2["bump-dependency"]
             skill3["…"]

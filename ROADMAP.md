@@ -42,7 +42,7 @@ Phase 1 a human (via the host) drives every rung; Phase 2 automates the ones
 that don't need judgment.
 
 ## Rung 0 — Stand up the eyes (over MCP)
-Container with dev server + headless browser + screenshot/visual-diff, and an
+Local workspace with dev server + headless browser + screenshot/visual-diff, and an
 agent runtime that can render a change and inspect it — all pointed at the
 [nx-angular-sandbox fixture](./SANDBOX.md) and reachable as MCP tools
 (`start_dev_server`, `screenshot_route`, `visual_diff`) that return images to the

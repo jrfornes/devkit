@@ -13,7 +13,7 @@ Reference architecture:
 ```mermaid
 flowchart LR
     ui["Agentic UI"] --> mcp["MCP tool surface"]
-    mcp --> container["Container / workspace"]
+    mcp --> workspace["Local workspace"]
     human["Human"] --> ui
     ui --> human
 ```

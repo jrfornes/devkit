@@ -107,4 +107,3 @@ harness/scripts/acceptance-interaction-test.ts
 ## Depends on
 
 - Eyes milestone (built)
-- M2 recommended — interaction + dev server stable in container

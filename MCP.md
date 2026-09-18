@@ -3,7 +3,7 @@
 Phase 1 exposes the environment as an **MCP server** and drives it from an
 existing host (Claude Desktop, Cursor). We borrow the shell — chat, dashboard,
 orchestrator, human-in-the-loop — instead of building it, and spend our effort on
-the substrate: the tools, the container, the skills, the eyes.
+the substrate: the tools, the workspace, the skills, the eyes.
 
 The key property: **these verbs are the same API a future autonomous
 orchestrator will call.** Swap the shell later; the surface underneath doesn't
@@ -21,7 +21,7 @@ Maps straight onto Rungs 0–1 of the [roadmap](./ROADMAP.md).
 - `lint` — lint / type-check
 
 **The eyes** — return images in the tool result:
-- `start_dev_server` — bring the app up in the container
+- `start_dev_server` — bring the app up in the workspace
 - `screenshot_route` — render a route, return the picture
 - `visual_diff` — diff a route against a baseline, return the diff image
 
@@ -68,16 +68,16 @@ screenshot the tool handed back.
 
 ---
 
-## The container lifecycle still has to exist
+## The workspace still has to exist
 
 MCP removes the *UI* for orchestration, not the thing itself. You still need:
 
-> spin up a workspace for this branch → tools operate against it → tear it down.
+> point tools at a checkout for this branch → tools operate against it.
 
-The tools are stateless-ish; the container holds the state. Decide early how a
-sequence of tool calls maps to a live workspace — most simply, a `status` /
-implicit-workspace-per-branch model where the first tool call for a branch brings
-a container up and it's reaped when the PR is opened or on idle timeout.
+The tools are stateless-ish; the **local workspace** holds the state. Isolation
+is a git branch on a configured checkout (`HARNESS_WORKSPACE`), not a container.
+Orient with `status`; there is nothing to spin up or reap. Docker is out of
+scope — see [plans/README.md](./plans/README.md).
 
 ---
 

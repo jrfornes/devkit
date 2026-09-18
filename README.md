@@ -2,12 +2,12 @@
 
 *Status: vision / seed doc*
 
-A customized cloud development environment where an agent works inside a
-per-project Docker container, draws on a growing library of **skills**, runs
+A customized development environment where an agent works against a
+**local project workspace**, draws on a growing library of **skills**, runs
 tests and inspects its own UI changes, fixes and heals things, and ships PRs —
 with a human in the loop only where judgment is actually needed.
 
-The **substrate** is the point of customization: our container, our skills, our
+The **substrate** is the point of customization: our workspace, our skills, our
 verification loop, our metrics. The **shell** on top — the thing that drives the
 loop and shows a human what's happening — we borrow before we build. See
 [Build order](#build-order-mcp-first).
@@ -54,7 +54,7 @@ And it's *especially* good for UI: MCP tool results can carry images, so
 the host's multimodal model does the inspecting. The whole verification loop runs
 with zero UI we had to build.
 
-> **The real work is the substrate: the tools, the container, the skills, the
+> **The real work is the substrate: the tools, the workspace, the skills, the
 > eyes. The UI is the easy part to add last.**
 
 We develop that substrate against a disposable **nx-angular fixture** the harness
@@ -75,7 +75,7 @@ Backend work has a cheap oracle. Does it compile, do the tests pass, does the
 type-checker go green? An agent can grind against that signal unattended.
 
 UI work has no such oracle. "Does this look right / behave right?" isn't
-something the code tells you. So the Docker env for UI dev is **not** really
+something the code tells you. So the workspace for UI dev is **not** really
 about node + a dev server — the load-bearing part is giving the agent **eyes**:
 
 - a running dev server,
@@ -124,7 +124,7 @@ is a matter of taste and the only oracle is a person.
 ## Docs in this set
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — the layered stack, the verification loop, diagrams
-- [MCP.md](./MCP.md) — Phase 1 tool surface: the verbs, granularity, container lifecycle
+- [MCP.md](./MCP.md) — Phase 1 tool surface: the verbs, granularity, workspace model
 - [SANDBOX.md](./SANDBOX.md) — the nx-angular fixture we develop against, and the port story
 - [MVP.md](./MVP.md) — the smallest thing worth building first (draft)
 - [METRICS.md](./METRICS.md) — what to measure instead of PR count
