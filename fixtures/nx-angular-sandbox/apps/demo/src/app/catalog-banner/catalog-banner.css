@@ -27,3 +27,18 @@
   margin: 0;
   opacity: 0.9;
 }
+
+.refresh {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.refresh:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

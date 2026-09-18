@@ -12,6 +12,7 @@
     "dev": "tsx src/index.ts",
     "acceptance": "tsx scripts/acceptance-test.ts",
     "acceptance:eyes": "tsx scripts/acceptance-eyes-test.ts",
+    "acceptance:interaction": "tsx scripts/acceptance-interaction-test.ts",
     "acceptance:ship": "tsx scripts/acceptance-ship-test.ts",
     "acceptance:skills": "tsx scripts/acceptance-skills-test.ts",
     "acceptance:rung1": "tsx scripts/acceptance-rung1-test.ts",

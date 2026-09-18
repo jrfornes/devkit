@@ -4,7 +4,7 @@ import { ensureDevServer } from './dev-server.js';
 
 let browser: Browser | null = null;
 
-async function getBrowser(): Promise<Browser> {
+export async function getBrowser(): Promise<Browser> {
   if (!browser) {
     browser = await chromium.launch({ headless: true });
   }
