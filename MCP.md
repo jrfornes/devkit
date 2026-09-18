@@ -77,8 +77,9 @@ MCP removes the *UI* for orchestration, not the thing itself. You still need:
 
 The tools are stateless-ish; the **local workspace** holds the state. Isolation
 is a git branch on a configured checkout (`HARNESS_WORKSPACE`), not a container.
-Orient with `status`; there is nothing to spin up or reap. Docker is out of
-scope — see [plans/README.md](./plans/README.md).
+`HARNESS_REPO_ROOT` is the harness (skills + MCP server); git / tests / PRs
+follow the target workspace. Orient with `status`; there is nothing to spin up
+or reap. Docker is out of scope — see [plans/README.md](./plans/README.md).
 
 ---
 

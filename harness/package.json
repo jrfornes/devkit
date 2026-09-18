@@ -16,6 +16,8 @@
     "acceptance:skills": "tsx scripts/acceptance-skills-test.ts",
     "acceptance:rung1": "tsx scripts/acceptance-rung1-test.ts",
     "reset-specimen": "tsx scripts/reset-specimen.ts",
+    "print-config": "tsx scripts/print-config.ts",
+    "test:config": "tsx scripts/config-split-test.ts",
     "baseline:generate": "tsx scripts/generate-visual-baseline.ts",
     "postinstall": "playwright install chromium"
   },

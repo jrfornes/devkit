@@ -11,10 +11,21 @@ async function git(cwd: string, args: string[]): Promise<string> {
   return stdout.trimEnd();
 }
 
+export function workspacePathspec(config: HarnessConfig): string {
+  const relative = path.relative(config.gitRoot, config.workspaceRoot);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(
+      `Workspace ${config.workspaceRoot} is not inside git root ${config.gitRoot}. ` +
+        'status / get_diff / open_pr git against the target checkout, not the harness repo.',
+    );
+  }
+  return relative || '.';
+}
+
 export async function getStatus(config: HarnessConfig) {
-  const cwd = config.repoRoot;
+  const cwd = config.gitRoot;
   const branch = await git(cwd, ['rev-parse', '--abbrev-ref', 'HEAD']);
-  const workspaceRelative = path.relative(config.repoRoot, config.workspaceRoot) || '.';
+  const workspaceRelative = workspacePathspec(config);
   const dirty = await git(cwd, ['status', '--porcelain', '--', workspaceRelative]);
   const diffStat = await git(cwd, ['diff', '--stat', '--', workspaceRelative]).catch(
     () => '',
@@ -23,8 +34,11 @@ export async function getStatus(config: HarnessConfig) {
   return {
     profile: config.profile.name,
     branch,
+    repoRoot: config.repoRoot,
+    gitRoot: config.gitRoot,
     workspaceRoot: config.workspaceRoot,
     workspaceRelative,
+    skillsDir: config.skillsDir,
     dirtyFiles: dirty
       .split('\n')
       .filter(Boolean)
@@ -35,6 +49,6 @@ export async function getStatus(config: HarnessConfig) {
 }
 
 export async function getDiff(config: HarnessConfig): Promise<string> {
-  const workspaceRelative = path.relative(config.repoRoot, config.workspaceRoot) || '.';
-  return git(config.repoRoot, ['diff', '--', workspaceRelative]);
+  const workspaceRelative = workspacePathspec(config);
+  return git(config.gitRoot, ['diff', '--', workspaceRelative]);
 }

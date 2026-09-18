@@ -170,7 +170,7 @@ export function createToolHandlers(config = loadConfig()): ToolHandlers {
 
     async ci_status(options) {
       const result = await getCiStatus({
-        repoRoot: config.repoRoot,
+        repoRoot: config.gitRoot,
         branch: options.branch,
         prUrl: options.prUrl,
       });

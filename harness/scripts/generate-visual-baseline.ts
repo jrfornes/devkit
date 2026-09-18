@@ -8,24 +8,43 @@ import { baselinePath } from '../src/profiles/nx-angular.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const config = loadConfig({ repoRoot });
-const cssPath = path.join(
+const route = process.argv[2] ?? '/';
+const sandboxCssPath = path.join(
   config.workspaceRoot,
   'apps/demo/src/app/catalog-banner/catalog-banner.css',
 );
 
-async function run() {
-  const css = await fs.readFile(cssPath, 'utf8');
-  const corrected = css.replace('background: #e74c3c;', 'background: #2ecc71;');
-  await fs.writeFile(cssPath, corrected, 'utf8');
+async function maybeCorrectSandboxBanner(): Promise<() => Promise<void>> {
+  if (config.profile.name !== 'nx-angular') {
+    return async () => undefined;
+  }
 
   try {
-    const screenshot = await captureScreenshotBuffer(config, '/');
-    const output = baselinePath(config.workspaceRoot, config.profile, '/');
+    const css = await fs.readFile(sandboxCssPath, 'utf8');
+    const corrected = css.replace('background: #e74c3c;', 'background: #2ecc71;');
+    if (corrected === css) {
+      return async () => undefined;
+    }
+    await fs.writeFile(sandboxCssPath, corrected, 'utf8');
+    return async () => {
+      await fs.writeFile(sandboxCssPath, css, 'utf8');
+    };
+  } catch {
+    return async () => undefined;
+  }
+}
+
+async function run() {
+  const restore = await maybeCorrectSandboxBanner();
+
+  try {
+    const screenshot = await captureScreenshotBuffer(config, route);
+    const output = baselinePath(config.workspaceRoot, config.profile, route);
     await fs.mkdir(path.dirname(output), { recursive: true });
     await fs.writeFile(output, screenshot);
     console.log(`Wrote baseline: ${output}`);
   } finally {
-    await fs.writeFile(cssPath, css, 'utf8');
+    await restore();
     await shutdownHarness();
   }
 }

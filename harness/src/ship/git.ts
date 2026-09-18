@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -30,6 +30,21 @@ async function git(cwd: string, args: string[]): Promise<string> {
       execError.message || 'Git command failed',
       ['git', ...args].join(' '),
       execError.stderr?.trim() || execError.stdout?.trim() || '',
+    );
+  }
+}
+
+export function resolveGitRoot(cwd: string): string {
+  try {
+    return execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      cwd,
+      encoding: 'utf8',
+    }).trim();
+  } catch (error) {
+    const details =
+      error instanceof Error ? error.message : 'git rev-parse --show-toplevel failed';
+    throw new Error(
+      `Workspace is not inside a git repository: ${cwd}. ${details}`,
     );
   }
 }

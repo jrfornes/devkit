@@ -1,0 +1,8 @@
+{
+  "workspaceRoot": "/absolute/path/to/private/repo",
+  "serveProject": "<nx app name>",
+  "testProjects": ["<app>", "<libs>"],
+  "buildProjects": ["<app>"],
+  "port": 4200,
+  "baselinesDir": "visual-baselines"
+}
