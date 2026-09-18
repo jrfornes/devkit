@@ -14,6 +14,8 @@
     "acceptance:eyes": "tsx scripts/acceptance-eyes-test.ts",
     "acceptance:ship": "tsx scripts/acceptance-ship-test.ts",
     "acceptance:skills": "tsx scripts/acceptance-skills-test.ts",
+    "acceptance:rung1": "tsx scripts/acceptance-rung1-test.ts",
+    "reset-specimen": "tsx scripts/reset-specimen.ts",
     "baseline:generate": "tsx scripts/generate-visual-baseline.ts",
     "postinstall": "playwright install chromium"
   },

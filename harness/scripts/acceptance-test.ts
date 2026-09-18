@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,26 +16,11 @@ const itemFilterPath = path.join(
   'libs/shared-data/src/lib/item-filter.ts',
 );
 
-function seedFailure() {
-  const contents = fs.readFileSync(itemFilterPath, 'utf8');
-  if (contents.includes(BUGGY_FILTER)) {
-    return;
-  }
-  if (contents.includes(FIXED_FILTER)) {
-    fs.writeFileSync(itemFilterPath, contents.replace(FIXED_FILTER, BUGGY_FILTER), 'utf8');
-    return;
-  }
-  throw new Error('Fixture is not in a recognized filterActiveItems state.');
-}
-
-function restoreFixture() {
-  const contents = fs.readFileSync(itemFilterPath, 'utf8');
-  if (contents.includes(FIXED_FILTER)) {
-    return;
-  }
-  if (contents.includes(BUGGY_FILTER)) {
-    fs.writeFileSync(itemFilterPath, contents.replace(BUGGY_FILTER, FIXED_FILTER), 'utf8');
-  }
+function resetSpecimen(id: string) {
+  execFileSync('tsx', ['harness/scripts/reset-specimen.ts', id], {
+    cwd: repoRoot,
+    stdio: 'inherit',
+  });
 }
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -46,7 +32,7 @@ function assert(condition: unknown, message: string): asserts condition {
 async function run() {
   console.log('Acceptance test: MVP loop against nx-angular sandbox\n');
 
-  seedFailure();
+  resetSpecimen('B');
 
   const status = await tools.status();
   console.log('1. status');
@@ -54,8 +40,9 @@ async function run() {
   assert(status.includes('nx-angular'), 'Expected nx-angular profile in status');
 
   const initialDiff = await tools.get_diff();
-  console.log('\n2. get_diff (initial)');
+  console.log('\n2. get_diff (seeded bug)');
   console.log(initialDiff || '(no diff)');
+  assert(initialDiff.includes(BUGGY_FILTER), 'Expected seeded buggy filter in diff');
 
   const failingTests = await tools.run_tests();
   console.log('\n3. run_tests (expect failure)');
@@ -77,15 +64,16 @@ async function run() {
   console.log(lintResult.slice(0, 300));
   assert(lintResult.includes('success: true'), 'Expected lint to pass');
 
-  const finalContents = fs.readFileSync(itemFilterPath, 'utf8');
-  console.log('\n7. verify fix applied');
+  const fixedSource = fs.readFileSync(itemFilterPath, 'utf8');
   assert(
-    finalContents.includes(FIXED_FILTER),
-    'Expected implementation to contain the fixed filter after skill run',
+    fixedSource.includes(FIXED_FILTER),
+    'Expected healed item-filter implementation on disk',
   );
+
+  const parsed = JSON.parse(skillResult) as { filesChanged?: string[] };
   assert(
-    !finalContents.includes(BUGGY_FILTER),
-    'Expected buggy filter to be removed after skill run',
+    parsed.filesChanged?.some((file) => file.endsWith('item-filter.ts')),
+    'Expected item-filter.ts in skill filesChanged',
   );
 
   console.log('\n✅ Acceptance test passed');
@@ -93,10 +81,10 @@ async function run() {
 
 run()
   .then(() => {
-    restoreFixture();
+    resetSpecimen('good');
   })
   .catch((error) => {
-    restoreFixture();
+    resetSpecimen('good');
     console.error('\n❌ Acceptance test failed');
     console.error(error);
     process.exit(1);

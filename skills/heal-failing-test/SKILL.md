@@ -34,6 +34,13 @@ Fix a non-visual test failure in the target workspace.
 
 ## Notes
 
-This MVP skill handles the sandbox's `filterActiveItems` specimen: items without an
-explicit `active: false` must be treated as active. The common bug is filtering with
-`active === true` instead of `active !== false`.
+Routes to specimen-specific handlers in the sandbox:
+
+| Specimen | Function | Fix |
+|----------|----------|-----|
+| **A** | `calculateTotal` | Remove off-by-one `+ 1` |
+| **B** | `filterActiveItems` | Use `active !== false` instead of `active === true` |
+| **C** | `sortByPriority` | Add id tie-break: `|| a.id.localeCompare(b.id)` |
+
+Specimen **C** is a regression trap: a naive name-only sort greens one spec but
+breaks the priority ordering spec. The skill applies the full-suite fix.
