@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { CiCheck, CiStatusResult, OpenPrResult } from '../../types.js';
+import { withHostPath } from '../../host-env.js';
 import type { PullRequestProvider } from '../pr.js';
 
 const execFileAsync = promisify(execFile);
@@ -23,7 +24,7 @@ function resolveToken(): string | undefined {
 
 async function gh(args: string[], cwd: string): Promise<string> {
   const token = resolveToken();
-  const env = token ? { ...process.env, GH_TOKEN: token } : process.env;
+  const env = withHostPath(token ? { ...process.env, GH_TOKEN: token } : process.env);
 
   try {
     const { stdout } = await execFileAsync('gh', args, {

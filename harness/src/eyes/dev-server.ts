@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { withHostPath } from '../host-env.js';
 import type { DevServerStatus, HarnessConfig } from '../types.js';
 
 let child: ChildProcess | null = null;
@@ -68,7 +69,7 @@ export async function startDevServer(config: HarnessConfig): Promise<DevServerSt
     ['nx', 'serve', serveProject, `--port=${port}`, '--host=127.0.0.1'],
     {
       cwd: config.workspaceRoot,
-      env: process.env,
+      env: withHostPath(),
       stdio: ['ignore', 'pipe', 'pipe'],
       detached: true,
     },

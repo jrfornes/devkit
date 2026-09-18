@@ -126,13 +126,15 @@ machine against the private checkout. Step 4 is already decided.
 2. `npm install` in that checkout.
 3. `npx nx show projects` — pick `serveProject`, `testProjects`, `buildProjects`.
 4. Copy the example JSON to `harness/profiles/nx-angular-private.local.json` and
-   fill those names plus the absolute `workspaceRoot`.
+   fill those names plus the **real** absolute `workspaceRoot` (not
+   `/absolute/path/to/private/repo`). Confirm `ls "$workspaceRoot/nx.json"`.
 5. Record nx / Angular versions vs the sandbox table above. Only change the
    sandbox if `nx serve` / `test` / `lint` / `build` flags actually differ.
-6. Point Cursor MCP env at the split:
+6. Point Cursor MCP env at the split. GUI apps often cannot find `git`:
 
    ```json
    {
+     "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
      "HARNESS_REPO_ROOT": "/absolute/path/to/devkit",
      "HARNESS_PROFILE": "nx-angular-private",
      "HARNESS_PROFILE_CONFIG": "/absolute/path/to/devkit/harness/profiles/nx-angular-private.local.json",

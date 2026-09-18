@@ -39,6 +39,7 @@ Other environment variables:
 - `HARNESS_PROFILE` — `nx-angular` (default, sandbox) or `nx-angular-private`
 - `HARNESS_PROFILE_CONFIG` — path to a gitignored JSON profile (required for `nx-angular-private`)
 - `HARNESS_GIT_ROOT` — override git toplevel (rarely needed)
+- `HARNESS_GIT_BIN` — absolute path to `git` if Cursor's MCP PATH cannot find it
 - `HARNESS_FORGE` — forge provider (default: `github`)
 - `HARNESS_BASE_BRANCH` — default base branch for `open_pr` (default: `main`)
 - `HARNESS_GITHUB_REPO` — optional `owner/name` override; otherwise `gh` uses the target repo
@@ -113,7 +114,10 @@ Fill in real values (`nx show projects` in the private checkout):
 }
 ```
 
-`*.local.json` is gitignored. Point Cursor's MCP env at that checkout:
+`*.local.json` is gitignored. `workspaceRoot` must be a real clone path, not
+`/absolute/path/to/private/repo`. Point Cursor's MCP env at that checkout.
+GUI-launched MCP processes often lack Homebrew `git`; include PATH (or
+`HARNESS_GIT_BIN`):
 
 ```json
 {
@@ -122,6 +126,7 @@ Fill in real values (`nx show projects` in the private checkout):
       "command": "node",
       "args": ["/absolute/path/to/devkit/harness/run-mcp.mjs"],
       "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
         "HARNESS_REPO_ROOT": "/absolute/path/to/devkit",
         "HARNESS_PROFILE": "nx-angular-private",
         "HARNESS_PROFILE_CONFIG": "/absolute/path/to/devkit/harness/profiles/nx-angular-private.local.json",

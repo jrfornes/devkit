@@ -7,7 +7,10 @@ import {
   loadProfileConfigFile,
   resolveProfileConfigPath,
 } from './profiles/load-profile-config.js';
+import { applyHostPath, assertWorkspaceReady } from './host-env.js';
 import { resolveGitRoot } from './ship/git.js';
+
+applyHostPath();
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepoRoot = path.resolve(moduleDir, '../..');
@@ -50,6 +53,8 @@ export function loadConfig(options?: {
         path.join(repoRoot, 'fixtures/nx-angular-sandbox'),
     );
   }
+
+  assertWorkspaceReady(workspaceRoot);
 
   const gitRoot = path.resolve(
     options?.gitRoot ?? process.env.HARNESS_GIT_ROOT ?? resolveGitRoot(workspaceRoot),

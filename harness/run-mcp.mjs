@@ -20,6 +20,12 @@ if (!fs.existsSync(entry)) {
   process.exit(1);
 }
 
+const extras = ['/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin', '/usr/bin', '/bin'];
+const pathParts = (process.env.PATH ?? '').split(path.delimiter).filter(Boolean);
+process.env.PATH = [...extras.filter((dir) => !pathParts.includes(dir)), ...pathParts].join(
+  path.delimiter,
+);
+
 const child = spawn(process.execPath, [tsxCli, entry, ...process.argv.slice(2)], {
   cwd: harnessDir,
   env: process.env,

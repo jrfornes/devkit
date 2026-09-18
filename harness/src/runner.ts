@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { withHostPath } from './host-env.js';
 import type { CommandResult } from './types.js';
 
 export function runCommand(
@@ -9,7 +10,7 @@ export function runCommand(
   return new Promise((resolve) => {
     const child = spawn(command, args, {
       cwd,
-      env: process.env,
+      env: withHostPath(),
       shell: false,
     });
 

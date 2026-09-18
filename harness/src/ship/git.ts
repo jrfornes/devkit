@@ -1,5 +1,7 @@
 import { execFile, execFileSync } from 'node:child_process';
+import fs from 'node:fs';
 import { promisify } from 'node:util';
+import { withHostPath } from '../host-env.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -14,12 +16,58 @@ export class GitError extends Error {
   }
 }
 
+let cachedGitBin: string | undefined;
+
+export function resolveGitBinary(): string {
+  if (cachedGitBin) {
+    return cachedGitBin;
+  }
+
+  const env = withHostPath();
+  const candidates = [
+    process.env.HARNESS_GIT_BIN,
+    'git',
+    '/opt/homebrew/bin/git',
+    '/usr/local/bin/git',
+    '/usr/bin/git',
+  ].filter((value): value is string => Boolean(value));
+
+  for (const candidate of candidates) {
+    try {
+      if (candidate !== 'git' && !fs.existsSync(candidate)) {
+        continue;
+      }
+      execFileSync(candidate, ['--version'], {
+        encoding: 'utf8',
+        env,
+        timeout: 5000,
+      });
+      cachedGitBin = candidate;
+      return candidate;
+    } catch {
+      // try the next location
+    }
+  }
+
+  throw new Error(
+    'git executable not found (spawn ENOENT). Cursor MCP often starts with a stripped PATH.\n' +
+      'From a normal terminal run `which git`, then in the MCP env set either:\n' +
+      '  HARNESS_GIT_BIN=/opt/homebrew/bin/git\n' +
+      '  PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin',
+  );
+}
+
+function gitOptions(cwd: string) {
+  return {
+    cwd,
+    env: withHostPath(),
+    maxBuffer: 10 * 1024 * 1024,
+  };
+}
+
 async function git(cwd: string, args: string[]): Promise<string> {
   try {
-    const { stdout } = await execFileAsync('git', args, {
-      cwd,
-      maxBuffer: 10 * 1024 * 1024,
-    });
+    const { stdout } = await execFileAsync(resolveGitBinary(), args, gitOptions(cwd));
     return stdout.trimEnd();
   } catch (error) {
     const execError = error as NodeJS.ErrnoException & {
@@ -36,17 +84,28 @@ async function git(cwd: string, args: string[]): Promise<string> {
 
 export function resolveGitRoot(cwd: string): string {
   try {
-    return execFileSync('git', ['rev-parse', '--show-toplevel'], {
-      cwd,
+    return execFileSync(resolveGitBinary(), ['rev-parse', '--show-toplevel'], {
+      ...gitOptions(cwd),
       encoding: 'utf8',
     }).trim();
   } catch (error) {
-    const details =
-      error instanceof Error ? error.message : 'git rev-parse --show-toplevel failed';
-    throw new Error(
-      `Workspace is not inside a git repository: ${cwd}. ${details}`,
-    );
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === 'ENOENT') {
+      throw new Error(
+        `git failed with ENOENT at workspace ${cwd}. ` +
+          (fs.existsSync(cwd)
+            ? 'git is not on the MCP PATH.'
+            : 'That folder does not exist.') +
+          ` ${err.message}`,
+      );
+    }
+    const details = error instanceof Error ? error.message : 'git rev-parse --show-toplevel failed';
+    throw new Error(`Workspace is not inside a git repository: ${cwd}. ${details}`);
   }
+}
+
+export async function runGit(cwd: string, args: string[]): Promise<string> {
+  return git(cwd, args);
 }
 
 export async function getCurrentBranch(repoRoot: string): Promise<string> {

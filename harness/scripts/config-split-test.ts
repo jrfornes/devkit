@@ -113,6 +113,57 @@ async function run() {
     );
 
     await withClearedHarnessEnv(async () => {
+      let placeholderThrew = false;
+      try {
+        loadConfig({
+          repoRoot: harnessRoot,
+          profile: 'nx-angular-private',
+          profileConfigPath: examplePath,
+        });
+      } catch (error) {
+        placeholderThrew =
+          error instanceof Error && error.message.includes('example placeholder');
+      }
+      assert(placeholderThrew, 'Unedited example workspaceRoot should fail before git');
+      console.log('2b. placeholder workspaceRoot — rejected before git');
+    });
+
+    await withClearedHarnessEnv(async () => {
+      const missingDir = path.join(os.tmpdir(), 'harness-missing-workspace');
+      const missingConfigPath = path.join(os.tmpdir(), 'harness-missing-workspace.json');
+      fs.writeFileSync(
+        missingConfigPath,
+        JSON.stringify(
+          {
+            workspaceRoot: missingDir,
+            serveProject: 'web-app',
+            testProjects: ['web-app'],
+            buildProjects: ['web-app'],
+            port: 4200,
+            baselinesDir: 'visual-baselines',
+          },
+          null,
+          2,
+        ),
+      );
+      let missingThrew = false;
+      try {
+        loadConfig({
+          repoRoot: harnessRoot,
+          profile: 'nx-angular-private',
+          profileConfigPath: missingConfigPath,
+        });
+      } catch (error) {
+        missingThrew =
+          error instanceof Error && error.message.includes('workspaceRoot does not exist');
+      } finally {
+        fs.rmSync(missingConfigPath, { force: true });
+      }
+      assert(missingThrew, 'Missing workspace directory should fail with a path error');
+      console.log('2c. missing workspace directory — rejected before git');
+    });
+
+    await withClearedHarnessEnv(async () => {
       let missingConfigThrew = false;
       try {
         loadConfig({ repoRoot: harnessRoot, profile: 'nx-angular-private' });
